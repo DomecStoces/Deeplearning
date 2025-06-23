@@ -1,36 +1,58 @@
 library(data.table)
 
-# Read all rows as character to process headers manually
-raw <- fread("C:/Users/Dominik/Desktop/Test1-Dominik-2025-06-15/labeled-data/output/image_predictions_DLC_Resnet101_Test1Jun15shuffle1_snapshot_240.csv", header = FALSE)
+# Read CSV with no header to process the 3-row header manually
+raw <- fread("C:/Users/Dominik/Desktop/Test2-Dominik-2025-06-21/labeled-data/CollectedData_Dominik.csv", header = FALSE)
 
-# Extract header info
-colnames <- paste(raw[2], raw[3], raw[4], sep = "_")
-colnames[1] <- "Image"
+# Build new column names from rows 2–4
+header1 <- as.character(unlist(raw[1, ]))
+header2 <- as.character(unlist(raw[2, ]))
+header3 <- as.character(unlist(raw[3, ]))
 
-# Drop the header rows and set proper names
-df <- raw[-c(1:4)]
-setnames(df, colnames)
+# Combine headers into meaningful names
+new_names <- paste(header2, header3, sep = "_")
+new_names[1:3] <- c("source", "type", "Image")  # Rename the first 3 manually
 
-# Convert needed columns to numeric
-df[, (2:ncol(df)) := lapply(.SD, as.numeric), .SDcols = 2:ncol(df)]
+# Assign new column names and drop header rows
+df <- raw[-c(1:3)]
+setnames(df, new_names)
 
-names(df)
+# Convert appropriate columns to numeric
+df[, (4:ncol(df)) := lapply(.SD, as.numeric), .SDcols = 4:ncol(df)]
 
-# Calculate distances
-# Compute antennomere distances
-df[, a2_length := sqrt((animal_La2_2_x - animal_La2_1_x)^2 + (animal_La2_2_y - animal_La2_1_y)^2)]
-df[, a3_length := sqrt((animal_La3_1_x - animal_La2_2_x)^2 + (animal_La3_1_y - animal_La2_2_y)^2)]
-df[, a4_length := sqrt((animal_La3_2_x - animal_La3_1_x)^2 + (animal_La3_2_y - animal_La3_1_y)^2)]
+# Calculate distances between body parts (Euclidean distance formula)
+df[, La2_length := sqrt((La2_2_x - La2_1_x)^2 + (La2_2_y - La2_1_y)^2)]
+df[, La3_length := sqrt((La3_1_x - La2_2_x)^2 + (La3_1_y - La2_2_y)^2)]
+df[, La4_length := sqrt((La3_2_x - La3_1_x)^2 + (La3_2_y - La3_1_y)^2)]
 
-# Conversion from pixels to mm
-pixels_per_mm <- 720.363 / 1.5  
+df[, Ra2_length := sqrt((Ra2_2_x - Ra2_1_x)^2 + (Ra2_2_y - Ra2_1_y)^2)]
+df[, Ra3_length := sqrt((Ra3_1_x - Ra2_2_x)^2 + (Ra3_1_y - Ra2_2_y)^2)]
+df[, Ra4_length := sqrt((Ra3_2_x - Ra3_1_x)^2 + (Ra3_2_y - Ra3_1_y)^2)]
+
+df[, Body_length := sqrt((Elytra_base_x - Elytra_tip_x)^2 + (Elytra_base_y - Elytra_tip_y)^2)]
+
+# Convert pixel measurements to mm Ophonus cribricollis
+pixels_per_mm <- 743.110 / 1.5
 mm_per_pixel <- 1 / pixels_per_mm
 
-# Add mm distances
-df[, a2_mm := a2_length * mm_per_pixel]
-df[, a3_mm := a3_length * mm_per_pixel]
-df[, a4_mm := a4_length * mm_per_pixel]
 
-fwrite(df[, .(Image, a2_length, a2_mm, a3_length, a3_mm, a4_length, a4_mm)],
-       "C:/Users/Dominik/Desktop/Test1-Dominik-2025-06-15/labeled-data/output/antennomere_lengths_with_mm.csv")
+df[, La2_mm := La2_length * mm_per_pixel]
+df[, La3_mm := La3_length * mm_per_pixel]
+df[, La4_mm := La4_length * mm_per_pixel]
+df[, Ra2_mm := Ra2_length * mm_per_pixel]
+df[, Ra3_mm := Ra3_length * mm_per_pixel]
+df[, Ra4_mm := Ra4_length * mm_per_pixel]
+df[, Body_mm := Body_length * mm_per_pixel]
+
+# Export selected results
+fwrite(df[, .(Image,
+              La2_length, La2_mm,
+              La3_length, La3_mm,
+              La4_length, La4_mm,
+              Ra2_length, Ra2_mm,
+              Ra3_length, Ra3_mm,
+              Ra4_length, Ra4_mm,
+              Body_length, Body_mm)],
+       "C:/Users/Dominik/Desktop/Test2-Dominik-2025-06-21/labeled-data/body_parts.csv")
+
+
 
