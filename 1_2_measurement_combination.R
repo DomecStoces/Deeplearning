@@ -1,10 +1,10 @@
 library(data.table)
 
 # Step 1: Read original dataset with blanks interleaved
-orig <- fread("Ophonus_cribr_miss.csv")
+orig <- fread("Ophonus_cribr_miss1.csv")
 
 # Step 2: Read second-round measurements
-second <- fread("C:/Users/Dominik/Desktop/Test2-Dominik-2025-06-21/labeled-data/second_measurements.csv")
+second <- fread("C:/Users/Dominik/Desktop/Test2-Dominik-2025-06-21/labeled-data/body_parts2.csv")
 
 # Step 3: Remove existing blank rows from original (to find positions)
 orig_non_blank <- orig[!apply(orig, 1, function(row) all(is.na(row) | trimws(as.character(row)) == ""))]
