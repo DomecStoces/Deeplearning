@@ -27,3 +27,18 @@ for (i in 1:nrow(second)) {
 
 # Step 7: Export the combined dataset
 fwrite(orig, "Ophonus_cribr_combined.csv")
+
+### Duplicit rows for dataset ###
+library(readxl)
+library(dplyr)
+library(tidyr)
+# Step 1: Read Excel file
+df <- read_excel("Morfometrie_2025.xlsx", sheet = "databaze")
+
+# Step 2: Fill down the values
+df_filled <- df %>%
+  fill(c(ID, Locality.number, Type, Trap, Year, Month, Color, Sex, Wing.m.), .direction = "down")
+
+# Step 3: Write the filled data back to Excel sheet
+library(writexl)
+write_xlsx(df_filled, "Morfometrie_2025_revised.xlsx")
