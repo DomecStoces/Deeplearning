@@ -1,7 +1,7 @@
 library(data.table)
 
 # Read CSV with no header to process the 3-row header manually
-raw <- fread("C:/Users/Dominik/Desktop/Test2-Dominik-2025-06-21/labeled-data/CollectedData_Dominik2.csv", header = FALSE)
+raw <- fread("C:/Users/Dominik/Desktop/Test2-Dominik-2025-06-21/CollectedData_Dominik2_final_775.csv", header = FALSE)
 
 # Build new column names from rows 2–4
 header1 <- as.character(unlist(raw[1, ]))
@@ -31,7 +31,7 @@ df[, Ra4_length := sqrt((Ra3_2_x - Ra3_1_x)^2 + (Ra3_2_y - Ra3_1_y)^2)]
 df[, Body_length := sqrt((Elytra_base_x - Elytra_tip_x)^2 + (Elytra_base_y - Elytra_tip_y)^2)]
 
 # Convert pixel measurements to mm Ophonus cribricollis
-pixels_per_mm <- 743.110 / 1.5
+pixels_per_mm <- 756.771 / 1.5
 mm_per_pixel <- 1 / pixels_per_mm
 
 
@@ -52,7 +52,7 @@ fwrite(df[, .(Image,
               Ra3_length, Ra3_mm,
               Ra4_length, Ra4_mm,
               Body_length, Body_mm)],
-       "C:/Users/Dominik/Desktop/Test2-Dominik-2025-06-21/labeled-data/body_parts.csv")
+       "C:/Users/Dominik/Desktop/Test2-Dominik-2025-06-21/body_parts.csv")
 
 
 

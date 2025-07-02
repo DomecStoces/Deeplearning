@@ -1,7 +1,7 @@
 library(data.table)
 
 # Step 1: Read the data
-df <- fread("C:/Users/Dominik/Desktop/Test2-Dominik-2025-06-21/labeled-data/body_parts.csv")
+df <- fread("C:/Users/Dominik/Desktop/Test2-Dominik-2025-06-21/body_parts.csv")
 
 # Step 1.5: Remove any pre-existing blank rows (rows where all fields are NA or empty)
 df <- df[!apply(df, 1, function(row) all(is.na(row) | trimws(row) == ""))]
@@ -17,4 +17,4 @@ rows_with_blanks <- rbindlist(
 )
 
 # Step 4: Save to CSV
-fwrite(rows_with_blanks, "Ophonus_cribr_miss.csv")
+fwrite(rows_with_blanks, "ALL.csv")
