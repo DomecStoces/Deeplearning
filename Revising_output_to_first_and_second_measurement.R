@@ -17,4 +17,4 @@ rows_with_blanks <- rbindlist(
 )
 
 # Step 4: Save to CSV
-fwrite(rows_with_blanks, "ALL.csv")
+fwrite(rows_with_blanks, "body_parts_blank.csv")

@@ -1,7 +1,7 @@
 library(data.table)
 
 # Read CSV with no header to process the 3-row header manually
-raw <- fread("C:/Users/Dominik/Desktop/Test2-Dominik-2025-06-21/CollectedData_Dominik2_final_775.csv", header = FALSE)
+raw <- fread("C:/Users/Dominik/Desktop/Test2-Dominik-2025-06-21/CollectedData_Dominik.csv", header = FALSE)
 
 # Build new column names from rows 2–4
 header1 <- as.character(unlist(raw[1, ]))
