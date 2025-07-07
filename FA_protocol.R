@@ -26,7 +26,7 @@ kurtosis(clean_data$a1)
 grubbs.test(clean_data$a1)
 
 # Dependency on ME in raw dataset in grubb_XXX
-aov_Ophonus <- aov(a1 ~ SIDE.a1 + Error(SIDE.a1:Group), data = grubb_picipennis4)
+aov_Ophonus <- aov(a1 ~ SIDE.a1 + Error(SIDE.a1:Group), data = grubb_picipennis)
 summary(aov_Ophonus)
 
 # Dependency on Directional Asymmetry
