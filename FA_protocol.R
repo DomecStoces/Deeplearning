@@ -4,10 +4,10 @@ library(writexl)
 
 # Read .xlsx dataset with header
 dataset <- read_xlsx("data_picipennis.xlsx", col_names = TRUE)
-
+grubb_picipennis3 <- read_xlsx("grubb_picipennis.xlsx", col_names = TRUE)
 # Convert to data.table
 dataset_dt <- as.data.table(dataset)
-
+grubb_picipennis4 <- as.data.table(grubb_picipennis3)
 ### FA protocol ###
 # Drop NAs
 library(dplyr)
@@ -26,7 +26,7 @@ kurtosis(clean_data$a1)
 grubbs.test(clean_data$a1)
 
 # Dependency on ME in raw dataset in grubb_XXX
-aov_Ophonus <- aov(a1 ~ SIDE.a1 + Error(SIDE.a1:Group), data = grubb_picipennis)
+aov_Ophonus <- aov(a1 ~ SIDE.a1 + Error(SIDE.a1:Group), data = grubb_picipennis4)
 summary(aov_Ophonus)
 
 # Dependency on Directional Asymmetry
