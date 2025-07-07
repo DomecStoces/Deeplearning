@@ -9,11 +9,11 @@ dataset <- read_xlsx("data_Ophonus.xlsx", col_names = TRUE)
 dataset_dt <- as.data.table(dataset)
 
 ### FA protocol ###
-
-library(moments)
+# Skewness and kurtosis for grubb_XXX dataset
 # High skewness is between +-1 and high kurtosis is above +-3: >3(leptocurtic); <3 (platykurtic)
-skewness(a1)
-kurtosis(a1)
+library(moments)
+skewness(grubb_Ophonus$a1)
+kurtosis(grubb_Ophonus$a1)
 library(outliers)
 grubbs.test(grubb_Ophonus$a1)
 
