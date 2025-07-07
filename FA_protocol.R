@@ -36,6 +36,7 @@ t.test(dataset_dt$DA.a1)
 shapiro.test(grubb_picipennis$a1)
 
 # Homogenity of variance of FA index
+library(car)
 leveneTest(FA.a1~Treatment*Sex, data = dataset_dt)
 
 # Dependency |R-L| to Body size
