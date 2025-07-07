@@ -55,7 +55,7 @@ lm_sex <- lm(FA.a1 ~ Sex*Wing, data = data_picipennis)
 summary(lm_sex)
 
 library(lme4)
-mod1<-lm(FA.a1~Body.size+Treatment*Wing+Sex+Month,data= data_picipennis)
+mod1<-lm(FA.a1~Body.size+Treatment*Wing+Sex+Month+(1|ID),data= data_picipennis)
 summary(mod1)
 aov1<-Anova(mod1)
 aov1
