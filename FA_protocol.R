@@ -48,7 +48,7 @@ lm_sex <- lm(FA.a1 ~ Sex*Wing, data = dataset_dt)
 summary(lm_sex)
 
 library(lme4)
-mod1<-lm(FA.a1~Body.size+Treatment*Wing+Sex+Month,data= dataset_dt)
+mod1<-lm(FA.a1~Treatment*Wing+Sex+Month,data= dataset_dt)
 summary(mod1)
 aov1<-Anova(mod1)
 aov1
