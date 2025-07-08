@@ -17,17 +17,29 @@ clean_data <- na.omit(grubb_picipennis)
 # High skewness is between +-1 and high kurtosis is above +-3: >3(leptocurtic); <3 (platykurtic)
 library(moments)
 library(outliers)
-skewness(grubb_picipennis$a1)
-kurtosis(grubb_picipennis$a1)
 grubbs.test(grubb_picipennis$a1)
 
-skewness(data_picipennis$a1)
-kurtosis(clean_data$a1)
-grubbs.test(clean_data$a1)
+Q1 <- quantile(clean_data$a2, 0.25)
+Q3 <- quantile(clean_data$a2, 0.75)
+IQR_value <- IQR(clean_data$a2)
+
+lower_bound <- Q1 - 3 * IQR_value
+upper_bound <- Q3 + 3 * IQR_value
+
+outliers_iqr <- clean_data$a2[clean_data$a2 < lower_bound | clean_data$a2 > upper_bound]
+outliers_iqr
+
+skewness(grubb_picipennis$a1)
+kurtosis(grubb_picipennis$a1)
 
 # Dependency on ME in raw dataset in grubb_XXX
-aov_Ophonus <- aov(a1 ~ SIDE.a1 + Error(SIDE.a1:Group), data = grubb_picipennis)
-summary(aov_Ophonus)
+library(nlme)
+lme_model <- lme(a1 ~ SIDE.a1, random = ~1|Group/SIDE.a1, data = grubb_picipennis)
+summary(lme_model)
+VarCorr(lme_model)
+
+# A linear mixed-effects model (REML) was used to test for directional asymmetry (DA), fluctuating asymmetry (FA), and measurement error (ME). The fixed effect of side was not significant (p = 0.33), indicating no DA. The variance attributable to individual × side interaction (FA) was 0.000175, while residual variance (ME) was 0.00000052, yielding a %ME of 0.30%.
+# Palmer, A. R., & Strobeck, C. (2003). Fluctuating asymmetry analyses revisited. In Polak, M. (Ed.), Developmental Instability: Causes and Consequences. Oxford University Press, pp. 279–319.
 
 # Dependency on Directional Asymmetry
 t.test(dataset_dt$DA.a1)
