@@ -38,7 +38,8 @@ lme_model <- lme(a1 ~ SIDE.a1, random = ~1|Group/SIDE.a1, data = grubb_picipenni
 summary(lme_model)
 VarCorr(lme_model)
 
-aov(a1 ~ SIDE.a1+Error(Group/SIDE.a1), data = grubb_picipennis1)
+aov1<-aov(a1 ~ SIDE.a1+Error(Group/SIDE.a1), data = grubb_picipennis1)
+summary(aov1)
 
 # A linear mixed-effects model (REML) was used to test for directional asymmetry (DA), fluctuating asymmetry (FA), and measurement error (ME). The fixed effect of side was not significant (p = 0.33), indicating no DA. The variance attributable to individual × side interaction (FA) was 0.000175, while residual variance (ME) was 0.00000052, yielding a %ME of 0.30%.
 # Palmer, A. R., & Strobeck, C. (2003). Fluctuating asymmetry analyses revisited. In Polak, M. (Ed.), Developmental Instability: Causes and Consequences. Oxford University Press, pp. 279–319.
@@ -69,7 +70,7 @@ lm_sex <- lm(FA.a1 ~ Sex*Wing, data = data_picipennis1)
 summary(lm_sex)
 
 library(lme4)
-mod1<-lmer(FA.a1~Body.size+Treatment*Wing+Sex+Month+(1|ID),data= data_picipennis1)
+mod1<-lmer(FA.a1~Treatment*Wing+(1|ID),data= data_picipennis1)
 summary(mod1)
 aov1<-Anova(mod1,type=2,adjust="tukey")
 aov1
