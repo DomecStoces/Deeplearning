@@ -69,10 +69,27 @@ lm_sex <- lm(FA.a1 ~ Sex*Wing, data = data_picipennis1)
 summary(lm_sex)
 
 library(lme4)
-mod1<-lm(FA.a1~Body.size+Treatment*Wing+Sex+Month+(1|ID),data= data_picipennis)
+mod1<-lmer(FA.a1~Body.size+Treatment*Wing+Sex+Month+(1|ID),data= data_picipennis1)
 summary(mod1)
-aov1<-Anova(mod1)
+aov1<-Anova(mod1,type=2,adjust="tukey")
 aov1
+
+library(brms)
+mod1_brm <- brm(
+  formula = FA.a1 ~ Body.size + Treatment * Wing + Sex + Year + Month,
+  data = data_picipennis1, gaussian(),
+  chains = 4,           
+  cores = 4,            
+  iter = 5000,        
+  seed = 123            
+)
+summary(mod1_brm)
+library(bayesplot)
+mcmc_plot(mod1_brm, 
+          variables = variables(mod1_brm, "^b_"), 
+          prob = 0.95, 
+          prob_outer = 0.99, 
+          type = "intervals")
 
 library(ggplot2)
 library(ggpubr)
@@ -93,7 +110,7 @@ d<-ggplot(data_picipennis1, aes(x = Treatment, y = FA.a1, fill = Treatment)) +
   ) +
   theme_bw(base_size = 12) +
   stat_compare_means(
-    method = "wilcox.test",                            
+    method = "t.test",                            
     comparisons = list(c("Control", "Solar")),   
     label = "p.format",                          
     hide.ns = FALSE)
@@ -104,10 +121,10 @@ d
 dev.off()
 
 # Treatment with Sex
-de<-ggplot(data_picipennis1, aes(x = Treatment, y = FA.a1, fill = Treatment)) +
+de<-ggplot(data_picipennis1, aes(x = Sex, y = FA.a1, fill = Sex)) +
   geom_boxplot(outlier.shape = NA, alpha = 0.6) +
-  geom_jitter(aes(color = Treatment), width = 0.2, size = 1.5, alpha = 0.8) +
-  facet_wrap(~ Sex) +
+  geom_jitter(aes(color = Sex), width = 0.2, size = 1.5, alpha = 0.8) +
+  facet_wrap(~ Treatment) +
   scale_fill_grey(start = 0.3, end = 0.8) +
   scale_color_grey(start = 0.3, end = 0.8) +
   labs(
@@ -119,8 +136,8 @@ de<-ggplot(data_picipennis1, aes(x = Treatment, y = FA.a1, fill = Treatment)) +
   ) +
   theme_bw(base_size = 12) +
   stat_compare_means(
-    method = "wilcox.test",                            
-    comparisons = list(c("Control", "Solar")),   
+    method = "t.test",                            
+    comparisons = list(c("F", "M")),   
     label = "p.format",                          
     hide.ns = FALSE)
 de
