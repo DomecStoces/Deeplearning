@@ -53,8 +53,6 @@ summary(aov1)
 t.test(dataset_dt$DA.a1)
 t.test(data_picipennis1$DA.a1)
 
-# Normality of raw dataset in grubb_XXX
-shapiro.test(grubb_picipennis1$a1)
 # Normality of FA index
 shapiro.test(data_picipennis1$FA.a1)
 
@@ -70,12 +68,15 @@ data_picipennis1$a1_abs <- abs(data_picipennis1$`a1 R` - data_picipennis1$`a1 L`
 lm_abs <- lm(a1_abs ~ Body.size, data = data_picipennis1)
 summary(lm_abs)
 
+lm_size<-lm(FA.a1~Body.size+Sex*Wing,data_picipennis1)
+summary(lm_size)
+
 # Dependency on Sex:Wing morphology
 lm_sex <- lm(FA.a1 ~ Sex*Wing, data = data_picipennis1)
 summary(lm_sex)
 
 library(lme4)
-mod1<-lmer(FA.a1~Treatment*Wing+(1|ID),data= data_picipennis1)
+mod1<-lmer(FA.a1~Body.size+Treatment*Wing+Sex+(1|ID),data= data_picipennis1)
 summary(mod1)
 aov1<-Anova(mod1,type=2,adjust="tukey")
 aov1
