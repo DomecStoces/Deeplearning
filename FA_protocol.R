@@ -19,15 +19,20 @@ library(moments)
 library(outliers)
 grubbs.test(grubb_picipennis1$a1)
 # Outliers Rivera, G.; Neely, C.M.D. Patterns of fluctuating asymmetry in the limbs of freshwater turtles: Are more functionally important limbs more symmetrical? Evolution 2020, 74, 660–670.
+# points between 1.5×IQR and 3×IQR are considered as natural variation in developmental instability.
 Q1 <- quantile(grubb_picipennis1$a1, 0.25)
 Q3 <- quantile(grubb_picipennis1$a1, 0.75)
 IQR_value <- IQR(grubb_picipennis1$a1)
 
-lower_bound <- Q1 - 3 * IQR_value
-upper_bound <- Q3 + 3 * IQR_value
-
-outliers_iqr <- grubb_picipennis1$a1[grubb_picipennis1$a1 < lower_bound | grubb_picipennis1$a1 > upper_bound]
-outliers_iqr
+lower_extreme <- Q1 - 3 * IQR_value
+upper_extreme <- Q3 + 3 * IQR_value
+lower_mild <- Q1 - 1.5 * IQR_value
+upper_mild <- Q3 + 1.5 * IQR_value
+grubb_picipennis1$outlier_type <- with(grubb_picipennis1, ifelse(
+  a1 < lower_extreme | a1 > upper_extreme, "extreme",
+  ifelse(a1 < lower_mild | a1 > upper_mild, "mild", "none")
+))
+table(grubb_picipennis1$outlier_type)
 
 skewness(grubb_picipennis1$a1)
 kurtosis(grubb_picipennis1$a1)
