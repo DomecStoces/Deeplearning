@@ -4,7 +4,7 @@ library(data.table)
 orig <- fread("C:/Users/Dominik/Desktop/Test2-Dominik-2025-06-21/body_parts_blank.csv")
 
 # Step 2: Read second-round measurements
-second <- fread("C:/Users/Dominik/Desktop/Test2-Dominik-2025-06-21/body_parts.csv")
+second <- fread("C:/Users/Dominik/Desktop/Test3-Dominik-2025-07-12/body_parts.csv")
 
 # Step 3: Remove existing blank rows from original (to find positions)
 orig_non_blank <- orig[!apply(orig, 1, function(row) all(is.na(row) | trimws(as.character(row)) == ""))]
@@ -26,7 +26,7 @@ for (i in 1:nrow(second)) {
 }
 
 # Step 7: Export the combined dataset
-fwrite(orig, "Ophonus_cribr_combined.csv")
+fwrite(orig, "revised.csv")
 
 ### Duplicit rows for dataset ###
 library(readxl)

@@ -1,7 +1,7 @@
 library(data.table)
 
 # Read CSV with no header to process the 3-row header manually
-raw <- fread("C:/Users/Dominik/Desktop/Test2-Dominik-2025-06-21/CollectedData_Dominik.csv", header = FALSE)
+raw <- fread("C:/Users/Dominik/Desktop/Test3-Dominik-2025-07-12/CollectedData_Dominik.csv", header = FALSE)
 
 # Build new column names from rows 2–4
 header1 <- as.character(unlist(raw[1, ]))
@@ -45,14 +45,13 @@ df[, Body_mm := Body_length * mm_per_pixel]
 
 # Export selected results
 fwrite(df[, .(Image,
-              La2_length, La2_mm,
-              La3_length, La3_mm,
-              La4_length, La4_mm,
-              Ra2_length, Ra2_mm,
-              Ra3_length, Ra3_mm,
-              Ra4_length, Ra4_mm,
-              Body_length, Body_mm)],
-       "C:/Users/Dominik/Desktop/Test2-Dominik-2025-06-21/body_parts.csv")
+              La2_length,
+              La3_length,
+              La4_length,
+              Ra2_length,
+              Ra3_length,
+              Ra4_length)],
+       "C:/Users/Dominik/Desktop/Test3-Dominik-2025-07-12/body_parts.csv")
 
 
 
