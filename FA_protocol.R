@@ -3,11 +3,11 @@ library(readxl)
 library(writexl)
 
 # Read .xlsx dataset with header
-dataset <- read_xlsx("data_picipennis.xlsx", col_names = TRUE)
-
+dataset <- read_xlsx("data_picipennis1.xlsx", col_names = TRUE)
+dataset1 <- read_xlsx("grubb_picipennis1.xlsx", col_names = TRUE)
 # Convert to data.table
 dataset_dt <- as.data.table(dataset)
-
+grubb_picipennis1 <- as.data.table(dataset1)
 ### FA protocol ###
 # Drop NAs
 library(dplyr)
@@ -64,6 +64,10 @@ leveneTest(FA.a1~Treatment*Sex, data = data_picipennis1)
 leveneTest(FA.a1~Treatment*Wing.m., data = dataset_dt)
 leveneTest(FA.a1~Treatment*Wing.m., data = data_picipennis1)
 # Dependency |R-L| to Body size
+dataset_dt$a1_abs<- abs(dataset_dt$`a1 R` - dataset_dt$`a1 L`) 
+lm_abs <- lm(a1_abs ~ Body.size, data = data_picipennis1)
+summary(lm_abs)
+
 data_picipennis1$a1_abs <- abs(data_picipennis1$`a1 R` - data_picipennis1$`a1 L`) 
 lm_abs <- lm(a1_abs ~ Body.size, data = data_picipennis1)
 summary(lm_abs)
@@ -72,11 +76,11 @@ lm_size<-lm(FA.a1~Body.size+Sex*Wing,data_picipennis1)
 summary(lm_size)
 
 # Dependency on Sex:Wing morphology
-lm_sex <- lm(FA.a1 ~ Sex*Wing, data = data_picipennis1)
+lm_sex <- lm(FA.a1 ~ Sex*Wing, data = dataset_dt)
 summary(lm_sex)
 
 library(lme4)
-mod1<-lmer(FA.a1~Body.size+Treatment*Wing+Sex+(1|ID),data= data_picipennis1)
+mod1<-lmer(FA.a1~Body.size+Treatment*Wing+Sex+(1|ID),data= dataset_dt)
 summary(mod1)
 aov1<-Anova(mod1,type=2,adjust="tukey")
 aov1
@@ -102,7 +106,7 @@ library(ggplot2)
 library(ggpubr)
 
 # Treatment with Wing morphology
-d<-ggplot(data_picipennis1, aes(x = Treatment, y = FA.a1, fill = Treatment)) +
+d<-ggplot(dataset_dt, aes(x = Treatment, y = FA.a1, fill = Treatment)) +
   geom_boxplot(outlier.shape = NA, alpha = 0.6) +
   geom_jitter(aes(color = Treatment), width = 0.2, size = 1.5, alpha = 0.8) +
   facet_wrap(~ Wing.m.) +
