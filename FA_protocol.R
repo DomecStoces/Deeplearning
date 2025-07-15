@@ -68,19 +68,21 @@ dataset_dt$a1_abs<- abs(dataset_dt$`a1 R` - dataset_dt$`a1 L`)
 lm_abs <- lm(a1_abs ~ Body.size, data = data_picipennis1)
 summary(lm_abs)
 
-data_picipennis1$a1_abs <- abs(data_picipennis1$`a1 R` - data_picipennis1$`a1 L`) 
-lm_abs <- lm(a1_abs ~ Body.size, data = data_picipennis1)
+data_picipennis_m <- data_picipennis1[data_picipennis1$Month == 5, ]
+
+data_picipennis_m$a1_abs <- abs(data_picipennis_m$`a1 R` - data_picipennis_m$`a1 L`) 
+lm_abs <- lm(a1_abs ~ Body.size, data = data_picipennis_m)
 summary(lm_abs)
 
-lm_size<-lm(FA.a1~Body.size+Sex*Wing,data_picipennis1)
+lm_size<-lm(FA.a1~Body.size+Sex*Wing,data_picipennis_m)
 summary(lm_size)
 
 # Dependency on Sex:Wing morphology
-lm_sex <- lm(FA.a1 ~ Sex*Wing, data = dataset_dt)
+lm_sex <- lm(FA.a1 ~ Sex*Wing, data = data_picipennis_m)
 summary(lm_sex)
 
 library(lme4)
-mod1<-lmer(FA.a1~Body.size+Treatment*Wing+Sex+(1|ID),data= dataset_dt)
+mod1<-lmer(FA.a1~Body.size+Treatment*Wing+Sex+(1|ID),data= data_picipennis_m)
 summary(mod1)
 aov1<-Anova(mod1,type=2,adjust="tukey")
 aov1
@@ -106,7 +108,7 @@ library(ggplot2)
 library(ggpubr)
 
 # Treatment with Wing morphology
-d<-ggplot(dataset_dt, aes(x = Treatment, y = FA.a1, fill = Treatment)) +
+d<-ggplot(data_picipennis1, aes(x = Treatment, y = FA.a1, fill = Treatment)) +
   geom_boxplot(outlier.shape = NA, alpha = 0.6) +
   geom_jitter(aes(color = Treatment), width = 0.2, size = 1.5, alpha = 0.8) +
   facet_wrap(~ Wing.m.) +
