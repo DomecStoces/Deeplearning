@@ -17,12 +17,12 @@ clean_data <- na.omit(grubb_picipennis)
 # High skewness is between +-1 and high kurtosis is above +-3: >3(leptocurtic); <3 (platykurtic)
 library(moments)
 library(outliers)
-grubbs.test(grubb_picipennis1$a1)
+grubbs.test(grubb_picipennis12$a1)
 # Outliers Rivera, G.; Neely, C.M.D. Patterns of fluctuating asymmetry in the limbs of freshwater turtles: Are more functionally important limbs more symmetrical? Evolution 2020, 74, 660–670.
 # points between 1.5×IQR and 3×IQR are considered as natural variation in developmental instability.
-Q1 <- quantile(grubb_picipennis1$a1, 0.25)
-Q3 <- quantile(grubb_picipennis1$a1, 0.75)
-IQR_value <- IQR(grubb_picipennis1$a1)
+Q1 <- quantile(grubb_picipennis12$a1, 0.25)
+Q3 <- quantile(grubb_picipennis12$a1, 0.75)
+IQR_value <- IQR(grubb_picipennis12$a1)
 
 lower_extreme <- Q1 - 3 * IQR_value
 upper_extreme <- Q3 + 3 * IQR_value
@@ -34,8 +34,8 @@ grubb_picipennis1$outlier_type <- with(grubb_picipennis1, ifelse(
 ))
 table(grubb_picipennis1$outlier_type)
 
-skewness(grubb_picipennis1$a1)
-kurtosis(grubb_picipennis1$a1)
+skewness(grubb_picipennis13$a1)
+kurtosis(grubb_picipennis13$a1)
 
 # Dependency on ME in raw dataset in grubb_XXX; extract variance and correlation components
 library(nlme)
@@ -54,17 +54,17 @@ t.test(dataset_dt$DA.a1)
 t.test(data_picipennis1$DA.a1)
 
 # Normality of FA index
-shapiro.test(data_picipennis1$FA.a1)
+shapiro.test(data_picipennis13$FA)
 
 # Homogenity of variance of FA index
 library(car)
 leveneTest(FA.a1~Treatment*Sex, data = dataset_dt)
-leveneTest(FA.a1~Treatment*Sex, data = data_picipennis1)
+leveneTest(FA~Treatment*Sex, data = data_picipennis13)
 
 leveneTest(FA.a1~Treatment*Wing.m., data = dataset_dt)
-leveneTest(FA.a1~Treatment*Wing.m., data = data_picipennis1)
+leveneTest(FA~Treatment*Wing.m., data = data_picipennis13)
 # Dependency |R-L| to Body size
-dataset_dt$a1_abs<- abs(dataset_dt$`a1 R` - dataset_dt$`a1 L`) 
+data_picipennis13$a1_abs<- abs(data_picipennis13$`a1 R` - data_picipennis13$`a1 L`) 
 lm_abs <- lm(a1_abs ~ Body.size, data = data_picipennis1)
 summary(lm_abs)
 
@@ -78,24 +78,23 @@ lm_size<-lm(FA.a1~Body.size+Sex*Wing,data_picipennis_m)
 summary(lm_size)
 
 # Dependency on Sex:Wing morphology
-lm_sex <- lm(FA.a1 ~ Sex*Wing, data = data_picipennis_m)
+lm_sex <- lm(FA ~ Sex*Wing, data = data_picipennis13)
 summary(lm_sex)
 
 library(lme4)
-mod1<-lmer(FA.a1~Body.size+Treatment*Wing+Sex+(1|ID),data= data_picipennis_m)
+mod1<-lmer(FA~Body.size+Treatment * Wing + Sex + (1 | ID),data= data_picipennis10)
 summary(mod1)
 aov1<-Anova(mod1,type=2,adjust="tukey")
 aov1
 
 library(brms)
 mod1_brm <- brm(
-  formula = FA.a1 ~ Body.size + Treatment * Wing + Sex + Year + Month,
-  data = data_picipennis1, gaussian(),
+  formula = FA ~ Body.size+Treatment * Wing + Sex + (1 | ID),
+  data = data_picipennis10, family=gaussian(),
   chains = 4,           
   cores = 4,            
   iter = 5000,        
-  seed = 123            
-)
+  seed = 123)
 summary(mod1_brm)
 library(bayesplot)
 mcmc_plot(mod1_brm, 
@@ -108,7 +107,7 @@ library(ggplot2)
 library(ggpubr)
 
 # Treatment with Wing morphology
-d<-ggplot(data_picipennis1, aes(x = Treatment, y = FA.a1, fill = Treatment)) +
+d<-ggplot(data_picipennis13, aes(x = Treatment, y = FA, fill = Treatment)) +
   geom_boxplot(outlier.shape = NA, alpha = 0.6) +
   geom_jitter(aes(color = Treatment), width = 0.2, size = 1.5, alpha = 0.8) +
   facet_wrap(~ Wing.m.) +
