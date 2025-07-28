@@ -85,7 +85,7 @@ mod1<-lmer(FA3~Body.size+Treatment * Wing + Sex + (1 | ID),data= data_picipennis
 summary(mod1)
 library(lmerTest)
 anova(mod1)
-# When |R-L
+# When |R-L| is non-normal
 library(glmmTMB)
 mod_lognormal <- glmmTMB(FA3 ~ Body.size + Treatment * Wing + Sex + (1|ID),
                          data = data_picipennis19,
@@ -101,11 +101,18 @@ tiff('DHARMa_residual_HP_a1.tiff',units="in",width=7,height=6,bg="white",res=600
 plot(simres)
 dev.off()
 
-library(emmeans)
-
-mod_3 <- brm(FA3~Body.size + Treatment * Wing + Sex + (1|ID),
-             data = data_picipennis19,
-             family = gaussian(link = "log"))
+library(brms)
+mod_3 <- brm(
+  formula = FA3 ~ Body.size + Treatment * Wing + Sex + (1 | ID),
+  data = data_picipennis19,
+  family = gaussian(link = "log"),
+  chains = 4,
+  cores = 4,
+  iter = 6000,
+  control = list(adapt_delta = 0.99, max_treedepth = 15),
+  seed = 1234
+)
+summary(mod_3)
 
 library(ggplot2)
 library(ggpubr)
