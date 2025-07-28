@@ -80,6 +80,7 @@ lm_treat <- lm(FA3 ~ Treatment*Wing, data = data_picipennis19_clean)
 summary(lm_treat)
 lm_st <- lm(FA3 ~ Treatment*Sex, data = data_picipennis19_clean)
 summary(lm_st)
+# When |R-L| are normal
 library(lme4)
 mod1<-lmer(FA3~Body.size+Treatment * Wing + Sex + (1 | ID),data= data_picipennis19)
 summary(mod1)
