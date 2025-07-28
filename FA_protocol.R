@@ -133,9 +133,9 @@ d<-ggplot(data_picipennis15, aes(x = Treatment, y = FA, fill = Treatment)) +
   scale_fill_grey(start = 0.3, end = 0.8) +
   scale_color_grey(start = 0.3, end = 0.8) +
   labs(
-    title = "FA.a1 across Treatments by Wing morph",
+    title = "Fluctuating asymmetry across treatments by wing morph",
     x = "Treatment",
-    y = "Fluctuating Asymmetry (FA.a1)",
+    y = "Fluctuating asymmetry",
     fill = "Treatment",
     color = "Treatment"
   ) +
@@ -159,9 +159,9 @@ de<-ggplot(data_picipennis1, aes(x = Sex, y = FA.a1, fill = Sex)) +
   scale_fill_grey(start = 0.3, end = 0.8) +
   scale_color_grey(start = 0.3, end = 0.8) +
   labs(
-    title = "FA.a1 across Treatments by Sex",
+    title = "Fluctuating asymmetry across treatments by sex",
     x = "Treatment",
-    y = "Fluctuating Asymmetry (FA.a1)",
+    y = "Fluctuating asymmetry",
     fill = "Treatment",
     color = "Treatment"
   ) +
@@ -185,9 +185,9 @@ df<-ggplot(data_picipennis1, aes(x = Sex, y = FA.a1, fill = Sex)) +
   scale_fill_grey(start = 0.3, end = 0.8) +
   scale_color_grey(start = 0.3, end = 0.8) +
   labs(
-    title = "FA.a1 across Wing morphology by Sex",
+    title = "Fluctuating asymmetry across wing morphology by sex",
     x = "Sex",
-    y = "Fluctuating Asymmetry (FA.a1)",
+    y = "Fluctuating asymmetry",
     fill = "Sex") +
   theme_bw(base_size = 12) +
   stat_compare_means(
