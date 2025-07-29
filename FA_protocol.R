@@ -20,33 +20,34 @@ library(outliers)
 grubbs.test(grubb_picipennis16$a1)
 # Outliers Rivera, G.; Neely, C.M.D. Patterns of fluctuating asymmetry in the limbs of freshwater turtles: Are more functionally important limbs more symmetrical? Evolution 2020, 74, 660–670.
 # points between 1.5×IQR and 3×IQR are considered as natural variation in developmental instability.
-Q1 <- quantile(grubb_picipennis19$a1, 0.25)
-Q3 <- quantile(grubb_picipennis19$a1, 0.75)
-IQR_value <- IQR(grubb_picipennis19$a1)
+Q1 <- quantile(grubb_ophonus_a4$a4, 0.25)
+Q3 <- quantile(grubb_ophonus_a4$a4, 0.75)
+IQR_value <- IQR(grubb_ophonus_a4$a4)
 
 lower_extreme <- Q1 - 3 * IQR_value
 upper_extreme <- Q3 + 3 * IQR_value
 lower_mild <- Q1 - 1.5 * IQR_value
 upper_mild <- Q3 + 1.5 * IQR_value
-grubb_picipennis19$outlier_type <- with(grubb_picipennis19, ifelse(
-  a1 < lower_extreme | a1 > upper_extreme, "extreme",
-  ifelse(a1 < lower_mild | a1 > upper_mild, "mild", "none")
+grubb_ophonus_a4$outlier_type <- with(grubb_ophonus_a4, ifelse(
+  a4 < lower_extreme | a4 > upper_extreme, "extreme",
+  ifelse(a4 < lower_mild | a4 > upper_mild, "mild", "none")
 ))
-table(grubb_picipennis19$outlier_type)
+table(grubb_ophonus_a4$outlier_type)
 
+# Remove outliers
 library(dplyr)
-grubb_picipennis19_clean <- subset(grubb_picipennis19, outlier_type == "none")
-IDs_no_outliers <- unique(grubb_picipennis19_clean$Group[grubb_picipennis19_clean$outlier_type == "none"])
-data_picipennis19_clean <- data_picipennis19 %>%
-  filter(ID %in% IDs_no_outliers)
-str(data_picipennis19_clean)
+grubb_ophonus_a4 <- subset(grubb_ophonus_a4, outlier_type != "extreme")
+IDs_mild_none <- unique(grubb_ophonus_a4$Group)
+data_ophonus_a4_clean <- data_ophonus_a4 %>%
+  filter(ID %in% IDs_mild_none)
+str(data_ophonus_a4_clean)
 
-skewness(grubb_picipennis19$a1)
-kurtosis(grubb_picipennis19$a1)
+skewness(grubb_ophonus_a4$a4)
+kurtosis(grubb_ophonus_a4$a4)
 
 # Dependency on ME in raw dataset in grubb_XXX; extract variance and correlation components
 library(nlme)
-lme_model <- lme(a1 ~ SIDE.a1, random = ~1|Group/SIDE.a1, data = grubb_picipennis19_clean)
+lme_model <- lme(a4 ~ SIDE.a1, random = ~1|Group/SIDE.a1, data = grubb_ophonus_a4)
 summary(lme_model)
 VarCorr(lme_model)
 
@@ -57,39 +58,42 @@ summary(aov1)
 # Palmer, A. R., & Strobeck, C. (2003). Fluctuating asymmetry analyses revisited. In Polak, M. (Ed.), Developmental Instability: Causes and Consequences. Oxford University Press, pp. 279–319.
 
 # Dependency |R-L| to Body size
-data_picipennis19_clean$a1_abs<- abs(data_picipennis19_clean$`a1 R` - data_picipennis19_clean$`a1 L`) 
-lm_abs <- lm(a1_abs ~ Body.size, data = data_picipennis19_clean)
+data_ophonus_a4$a1_abs<- abs(data_ophonus_a4$`a4 R` - data_ophonus_a4$`a4 L`) 
+lm_abs <- lm(a1_abs ~ Body.size, data = data_ophonus_a4)
 summary(lm_abs)
 
 # Normality of |R-L|; i) if significant -> error structure is non-additive; ii) test log transformation if significant -> non-multiplicative
-shapiro.test(data_picipennis19_clean$a1_abs)
+shapiro.test(data_ophonus_a4$a1_abs)
 
 data_picipennis19_clean$log_fa <- log(data_picipennis19_clean$a1_abs + 0.0001)
 shapiro.test(data_picipennis19$log_fa)
 
 # Homogenity of variance of FA index
 library(car)
-leveneTest(FA3~Treatment*Sex, data = data_picipennis19_clean)
+leveneTest(FA3~Treatment*Sex, data = data_ophonus_a4)
 
-leveneTest(FA3~Treatment*Wing.m., data = data_picipennis19_clean)
+leveneTest(FA3~Treatment*Wing.m., data = data_ophonus_a4)
 
+data_flav_a3_clean$Treatment <- factor(data_flav_a3_clean$Treatment)
+data_flav_a3_clean$Sex <- factor(data_flav_a3_clean$Sex)
+data_flav_a3_clean$Wing.m. <- factor(data_flav_a3_clean$Wing.m.)
 # Dependency on Sex:Wing morphology
-lm_sex <- lm(FA3 ~ Sex*Wing, data = data_picipennis19_clean)
+lm_sex <- lm(FA3 ~ Sex*Wing, data = data_ophonus_a4)
 summary(lm_sex)
-lm_treat <- lm(FA3 ~ Treatment*Wing, data = data_picipennis19_clean)
+lm_treat <- lm(FA3 ~ Treatment*Wing, data = data_ophonus_a4)
 summary(lm_treat)
-lm_st <- lm(FA3 ~ Treatment*Sex, data = data_picipennis19_clean)
+lm_st <- lm(FA3 ~ Treatment*Sex, data = data_ophonus_a4)
 summary(lm_st)
 # When |R-L| are normal
 library(lme4)
-mod1<-lmer(FA3~Body.size+Treatment * Wing + Sex + (1 | ID)+(1|Trap),data= data_picipennis19)
+mod1<-lmer(FA3~Body.size+Treatment * Sex + Wing + (1 | ID)+(1|Trap),data= data_picipennis19)
 summary(mod1)
 library(lmerTest)
 anova(mod1)
 # When |R-L| is non-normal
 library(glmmTMB)
-mod_lognormal <- glmmTMB(FA3 ~ Body.size + Treatment * Wing + Sex + (1|ID)+(1|Trap),
-                         data = data_picipennis19,
+mod_lognormal <- glmmTMB(FA3 ~ Body.size + Sex*Wing + (1|ID),
+                         data = data_ophonus_a4,
                          family = gaussian(link = "log"))
 summary(mod_lognormal)
 library(DHARMa)
@@ -98,7 +102,7 @@ plot(simres)
 library(car)
 Anova(mod_lognormal, type = 3)
 
-tiff('DHARMa_residual_HP_a1.tiff',units="in",width=7,height=6,bg="white",res=600)
+tiff('DHARMa_residual_OC_a1.tiff',units="in",width=7,height=6,bg="white",res=600)
 plot(simres)
 dev.off()
 
@@ -119,7 +123,7 @@ library(ggplot2)
 library(ggpubr)
 
 # Treatment with Wing morphology
-d<-ggplot(data_picipennis19, aes(x = Treatment, y = FA3, fill = Treatment)) +
+d<-ggplot(data_ophonus_a2, aes(x = Treatment, y = FA3, fill = Treatment)) +
   geom_boxplot(outlier.shape = NA, alpha = 0.6) +
   geom_jitter(aes(color = Treatment), width = 0.2, size = 1.5, alpha = 0.8) +
   facet_wrap(~ Wing.m.) +
@@ -140,12 +144,12 @@ d<-ggplot(data_picipennis19, aes(x = Treatment, y = FA3, fill = Treatment)) +
     hide.ns = FALSE)
 d
 # Save the plot
-tiff('Harpalus_picipennis.tiff',units="in",width=7,height=6,bg="white",res=600)
+tiff('Ophonus_cribricollis.tiff',units="in",width=7,height=6,bg="white",res=600)
 d
 dev.off()
 
 # Treatment with Sex
-de<-ggplot(data_picipennis19, aes(x = Sex, y = FA.a1, fill = Sex)) +
+de<-ggplot(data_flav_a3_clean, aes(x = Sex, y = FA3, fill = Sex)) +
   geom_boxplot(outlier.shape = NA, alpha = 0.6) +
   geom_jitter(aes(color = Sex), width = 0.2, size = 1.5, alpha = 0.8) +
   facet_wrap(~ Treatment) +
@@ -171,7 +175,7 @@ de
 dev.off()
 
 # Wing morphology across Sex
-df<-ggplot(data_picipennis19, aes(x = Sex, y = FA3, fill = Sex)) +
+df<-ggplot(data_flav_a3_clean, aes(x = Sex, y = FA3, fill = Sex)) +
   geom_boxplot(outlier.shape = NA, alpha = 0.6) +
   geom_jitter(aes(color = Sex), width = 0.2, size = 1.5, alpha = 0.8) +
   facet_wrap(~ Wing.m.) +
