@@ -41,8 +41,8 @@ data_picipennis19_clean <- data_picipennis19 %>%
   filter(ID %in% IDs_no_outliers)
 str(data_picipennis19_clean)
 
-skewness(grubb_picipennis19_clean$a1)
-kurtosis(grubb_picipennis19_clean$a1)
+skewness(grubb_picipennis19$a1)
+kurtosis(grubb_picipennis19$a1)
 
 # Dependency on ME in raw dataset in grubb_XXX; extract variance and correlation components
 library(nlme)
@@ -126,9 +126,9 @@ d<-ggplot(data_picipennis19, aes(x = Treatment, y = FA3, fill = Treatment)) +
   scale_fill_grey(start = 0.3, end = 0.8) +
   scale_color_grey(start = 0.3, end = 0.8) +
   labs(
-    title = "FA.a1 across Treatments by Wing morph",
+    title = "Fluctuating asymmetry across treatments by wing morphology",
     x = "Treatment",
-    y = "Fluctuating Asymmetry (FA.a1)",
+    y = "Fluctuating asymmetry",
     fill = "Treatment",
     color = "Treatment"
   ) +
@@ -152,9 +152,9 @@ de<-ggplot(data_picipennis19, aes(x = Sex, y = FA.a1, fill = Sex)) +
   scale_fill_grey(start = 0.3, end = 0.8) +
   scale_color_grey(start = 0.3, end = 0.8) +
   labs(
-    title = "FA.a1 across Treatments by Sex",
+    title = "Fluctuating asymmetry across treatments by Sex",
     x = "Treatment",
-    y = "Fluctuating Asymmetry (FA.a1)",
+    y = "Fluctuating asymmetry",
     fill = "Treatment",
     color = "Treatment"
   ) +
@@ -178,9 +178,9 @@ df<-ggplot(data_picipennis19, aes(x = Sex, y = FA3, fill = Sex)) +
   scale_fill_grey(start = 0.3, end = 0.8) +
   scale_color_grey(start = 0.3, end = 0.8) +
   labs(
-    title = "FA.a1 across Wing morphology by Sex",
+    title = "Fluctuating asymmetry across Wing morphology by Sex",
     x = "Sex",
-    y = "Fluctuating Asymmetry (FA.a1)",
+    y = "Fluctuating asymmetry",
     fill = "Sex") +
   theme_bw(base_size = 12) +
   stat_compare_means(
