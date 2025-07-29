@@ -82,13 +82,13 @@ lm_st <- lm(FA3 ~ Treatment*Sex, data = data_picipennis19_clean)
 summary(lm_st)
 # When |R-L| are normal
 library(lme4)
-mod1<-lmer(FA3~Body.size+Treatment * Wing + Sex + (1 | ID),data= data_picipennis19)
+mod1<-lmer(FA3~Body.size+Treatment * Wing + Sex + (1 | ID)+(1|Trap),data= data_picipennis19)
 summary(mod1)
 library(lmerTest)
 anova(mod1)
 # When |R-L| is non-normal
 library(glmmTMB)
-mod_lognormal <- glmmTMB(FA3 ~ Body.size + Treatment * Wing + Sex + (1|ID),
+mod_lognormal <- glmmTMB(FA3 ~ Body.size + Treatment * Wing + Sex + (1|ID)+(1|Trap),
                          data = data_picipennis19,
                          family = gaussian(link = "log"))
 summary(mod_lognormal)
@@ -104,7 +104,7 @@ dev.off()
 
 library(brms)
 mod_3 <- brm(
-  formula = FA3 ~ Body.size + Treatment * Wing + Sex + (1 | ID),
+  formula = FA3 ~ Body.size + Treatment * Wing + Sex + (1 | ID)+(1|Trap)+(1|Year),
   data = data_picipennis19,
   family = gaussian(link = "log"),
   chains = 4,
