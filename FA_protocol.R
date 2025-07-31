@@ -121,7 +121,7 @@ summary(mod_3)
 
 emm <- emmeans(mod_lognormal, ~ Treatment | Wing)
 emm_df <- as.data.frame(emm)
-ggplot(emm_df, aes(x = Treatment, y = emmean,
+ggplot(data_picipennis_a2, aes(x = Treatment, y = FA3,
                    color = Wing, group = Wing)) +
   geom_point(position = position_dodge(width = 0.4), size = 3) +
   geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL),
@@ -136,16 +136,15 @@ library(ggplot2)
 library(ggpubr)
 
 # Treatment with Wing morphology
-d<-ggplot(emm_df, aes(x = Treatment, y = emmean, fill = Treatment)) +
+d<-ggplot(data_ophonus_a2_c, aes(x = Treatment, y = FA3, fill = Treatment)) +
   geom_boxplot(outlier.shape = NA, alpha = 0.6) +
   geom_jitter(aes(color = Treatment), width = 0.2, size = 1.5, alpha = 0.8) +
   facet_wrap(~ Wing.m.) +
   scale_fill_grey(start = 0.3, end = 0.8) +
   scale_color_grey(start = 0.3, end = 0.8) +
   labs(
-    title = "Fluctuating asymmetry across treatments by wing morphology",
     x = "Treatment",
-    y = "Fluctuating asymmetry",
+    y = "Fluctuating asymmetry index",
     fill = "Treatment",
     color = "Treatment"
   ) +
