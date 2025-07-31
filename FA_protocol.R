@@ -119,11 +119,24 @@ mod_3 <- brm(
 )
 summary(mod_3)
 
+emm <- emmeans(mod_lognormal, ~ Treatment | Wing)
+emm_df <- as.data.frame(emm)
+ggplot(emm_df, aes(x = Treatment, y = emmean,
+                   color = Wing, group = Wing)) +
+  geom_point(position = position_dodge(width = 0.4), size = 3) +
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL),
+                position = position_dodge(width = 0.4), width = 0.2) +
+  geom_line(position = position_dodge(width = 0.4)) +
+  labs(title = "Model-estimated FA3 across treatments and wing types",
+       x = "Treatment", y = "Estimated FA3 (log scale)",
+       color = "Wing morphology") +
+  theme_bw()
+
 library(ggplot2)
 library(ggpubr)
 
 # Treatment with Wing morphology
-d<-ggplot(data_ophonus_a2_c, aes(x = Treatment, y = FA3, fill = Treatment)) +
+d<-ggplot(emm_df, aes(x = Treatment, y = emmean, fill = Treatment)) +
   geom_boxplot(outlier.shape = NA, alpha = 0.6) +
   geom_jitter(aes(color = Treatment), width = 0.2, size = 1.5, alpha = 0.8) +
   facet_wrap(~ Wing.m.) +
