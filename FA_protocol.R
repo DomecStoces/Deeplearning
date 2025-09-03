@@ -67,32 +67,41 @@ shapiro.test(data_ophonus_a2_c$a1_abs)
 data_picipennis19_clean$log_fa <- log(data_picipennis19_clean$a1_abs + 0.0001)
 shapiro.test(data_picipennis19$log_fa)
 
+# Ordered factor of Wing.m.
+data_ophonus_a2_c <- data_ophonus_a2_c %>%
+  mutate(
+    Treatment = factor(Treatment, levels = c("Control", "Solar park")),
+    Wing.m.    = factor(Wing.m., levels = c("B","M"),
+                       labels = c("Brachypterous","Macropterous"),
+                       ordered = TRUE)
+  )
+
 # Homogenity of variance of FA index
 library(car)
 leveneTest(FA3~Treatment*Sex, data = data_ophonus_a2_c)
 
 leveneTest(FA3~Treatment*Wing.m., data = data_ophonus_a2_c)
 
-data_flav_a3_clean$Treatment <- factor(data_flav_a3_clean$Treatment)
-data_flav_a3_clean$Sex <- factor(data_flav_a3_clean$Sex)
+data_ophonus_a2_c$Treatment <- factor(data_ophonus_a2_c$Treatment)
+data_ophonus_a2_c$Sex <- factor(data_ophonus_a2_c$Sex)
 data_flav_a3_clean$Wing.m. <- factor(data_flav_a3_clean$Wing.m.)
 # Dependency on Sex:Wing morphology
-lm_sex <- lm(FA3 ~ Sex*Wing, data = data_ophonus_a2_c)
+lm_sex <- lm(FA3 ~ Sex*Wing.m., data = data_ophonus_a2_c)
 summary(lm_sex)
-lm_treat <- lm(FA3 ~ Treatment*Wing, data = data_ophonus_a2_c)
+lm_treat <- lm(FA3 ~ Treatment*Wing.m., data = data_ophonus_a2_c)
 summary(lm_treat)
 lm_st <- lm(FA3 ~ Treatment*Sex, data = data_ophonus_a2_c)
 summary(lm_st)
 # When |R-L| are normal
 library(lme4)
-mod1<-lmer(FA3~Body.size+Treatment * Sex + Wing + (1 | ID)+(1|Trap),data= data_picipennis19)
+mod1<-lmer(FA3~Body.size+Treatment * Sex + Wing.m. + (1 | ID)+(1|Trap),data= data_ophonus_a2_c)
 summary(mod1)
 library(lmerTest)
 anova(mod1)
 # When |R-L| is non-normal
 library(glmmTMB)
-mod_lognormal <- glmmTMB(FA3 ~ Body.size + Treatment*Wing +Sex + (1|ID)+(1|Locality.number),
-                         data = data_picipennis_a2,
+mod_lognormal <- glmmTMB(FA3 ~ Body.size + Treatment*Wing.m. +Sex + (1|ID)+(1|Locality.number),
+                         data = data_ophonus_a2_c,
                          family = gaussian(link = "log"))
 summary(mod_lognormal)
 library(DHARMa)
@@ -104,48 +113,17 @@ Anova(mod_lognormal, type = 3)
 tiff('DHARMa_residual_HP_a2.tiff',units="in",width=7,height=6,bg="white",res=600)
 plot(simres)
 dev.off()
-
-library(brms)
-mod_3 <- brm(
-  formula = FA3 ~ Body.size + Treatment * Wing + Sex + (1 | ID)+(1|Trap)+(1|Year),
-  data = data_picipennis19,
-  family = gaussian(link = "log"),
-  chains = 4,
-  cores = 4,
-  iter = 6000,
-  control = list(adapt_delta = 0.99, max_treedepth = 15),
-  seed = 1234
-)
-summary(mod_3)
-
-emm <- emmeans(mod_lognormal, ~ Treatment | Wing)
-emm_df <- as.data.frame(emm)
-ggplot(data_picipennis_a2, aes(x = Treatment, y = FA3,
-                   color = Wing, group = Wing)) +
-  geom_point(position = position_dodge(width = 0.4), size = 3) +
-  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL),
-                position = position_dodge(width = 0.4), width = 0.2) +
-  geom_line(position = position_dodge(width = 0.4)) +
-  labs(title = "Model-estimated FA3 across treatments and wing types",
-       x = "Treatment", y = "Estimated FA3 (log scale)",
-       color = "Wing morphology") +
-  theme_bw()
-
+# Plotting results of model estimations (predicted values) 
 library(ggplot2)
 library(ggpubr)
+library(emmeans)
 
-data_picipennis_a2 <- data_picipennis_a2 %>%
-  mutate(
-    Treatment = recode(Treatment,
-                       "Solar" = "Solar park"),
-    Wing.m. = recode(Wing.m.,
-                     "A" = "Apterous",
-                     "B" = "Brachypterous",
-                     "M" = "Macropterous")
-  )
+# Marginal means
+emm <- emmeans(mod_lognormal, ~ Treatment | Wing.m., type = "response")
+emm_df <- as.data.frame(emm)
 
 # Treatment with Wing morphology
-d<-ggplot(data_picipennis_a2, aes(x = Treatment, y = FA3, fill = Treatment)) +
+d<-ggplot(emm_df, aes(x = Treatment, y = response, fill = Treatment)) +
   geom_boxplot(outlier.shape = NA, alpha = 0.6) +
   geom_jitter(aes(color = Treatment), width = 0.2, size = 1.5, alpha = 0.8) +
   facet_wrap(~ Wing.m.) +
@@ -164,6 +142,7 @@ d<-ggplot(data_picipennis_a2, aes(x = Treatment, y = FA3, fill = Treatment)) +
     label = "p.format",                          
     hide.ns = FALSE)
 d
+
 # Save the plot
 tiff('Harpalus_picipennis.tiff',units="in",width=7,height=6,bg="white",res=600)
 d
@@ -177,11 +156,7 @@ de<-ggplot(data_flav_a3_clean, aes(x = Sex, y = FA3, fill = Sex)) +
   scale_fill_grey(start = 0.3, end = 0.8) +
   scale_color_grey(start = 0.3, end = 0.8) +
   labs(
-<<<<<<< HEAD
     title = "Fluctuating asymmetry across treatments by sex",
-=======
-    title = "Fluctuating asymmetry across treatments by Sex",
->>>>>>> c8646017e585b3297695918da4b53d058198ddfd
     x = "Treatment",
     y = "Fluctuating asymmetry",
     fill = "Treatment",
@@ -207,11 +182,7 @@ df<-ggplot(data_flav_a3_clean, aes(x = Sex, y = FA3, fill = Sex)) +
   scale_fill_grey(start = 0.3, end = 0.8) +
   scale_color_grey(start = 0.3, end = 0.8) +
   labs(
-<<<<<<< HEAD
     title = "Fluctuating asymmetry across wing morphology by sex",
-=======
-    title = "Fluctuating asymmetry across Wing morphology by Sex",
->>>>>>> c8646017e585b3297695918da4b53d058198ddfd
     x = "Sex",
     y = "Fluctuating asymmetry",
     fill = "Sex") +
