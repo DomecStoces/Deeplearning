@@ -74,10 +74,12 @@ data_ophonus_a2_c$Wing <- factor(
   labels = c("Brachypterous", "Macropterous"),
   ordered = TRUE
 )
+data_ophonus_a2_c$Wing_num <- as.numeric(data_ophonus_a2_c$Wing)
 
-data_picipennis_a2$Wing <- factor(data_picipennis_a2$Wing, 
-                         levels = c("A","B","M"), 
-                         ordered = TRUE)
+data_picipennis_a2$Wing_num <- as.numeric(factor(
+  data_picipennis_a2$Wing,
+  levels = c("Apterous","Brachypterous","Macropterous"))
+)
 
 # Homogenity of variance of FA index
 library(car)
@@ -103,8 +105,8 @@ library(lmerTest)
 anova(mod1)
 # When |R-L| is non-normal
 library(glmmTMB)
-mod_lognormal <- glmmTMB(FA3 ~ Body.size + Treatment*Wing +Sex + (1|ID)+(1|Locality.number),
-                         data = data_picipennis_a2,
+mod_lognormal <- glmmTMB(FA3 ~ Body.size + Treatment*Wing_num +Sex + (1|ID)+(1|Locality.number),
+                         data = data_ophonus_a2_c,
                          family = gaussian(link = "log"))
 summary(mod_lognormal)
 library(DHARMa)
@@ -121,10 +123,66 @@ library(ggplot2)
 library(ggpubr)
 library(emmeans)
 
-# Marginal means
-emm <- emmeans(mod_lognormal, ~ Treatment | Wing, type = "response")
+# Ophonus cribricollis: model-based predictions at Wing_num = 1,2
+emm <- emmeans(
+  mod_lognormal, ~ Treatment * Wing_num,
+  at = list(Wing_num = 1:2),
+  type = "response",
+  weights = "proportional"  # averages over other factors by sample proportions
+)
 emm_df <- as.data.frame(emm)
 
+d<-ggplot(emm_df, aes(x = Wing_num, y = response,
+                      color = Treatment, group = Treatment)) +
+  geom_ribbon(aes(ymin = lower.CL, ymax = upper.CL, fill = Treatment),
+              alpha = 0.25, linewidth = 0) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  scale_x_continuous(breaks = 1:2,
+                     labels = c("Brachypterous","Macropterous")) +
+  labs(x = "Wing morphology",
+       y = "Fluctuating asymmetry index") +
+  theme_bw(base_size = 15) + theme_classic(base_size = 15)+
+  scale_color_manual(values = c("Control" = "black", "Solar park" = "grey40")) +
+  scale_fill_manual(values  = c("Control" = "black", "Solar park" = "grey40")) +
+  geom_jitter(data = data_ophonus_a2_c,
+              aes(x = Wing_num, y = FA3, color = Treatment), 
+              inherit.aes = FALSE,
+              width = 0.1, alpha = 0.6, size = 1.8)
+d
+# Harpalus picipennis: model-based predictions at Wing_num = 1,2,3
+emm <- emmeans(
+  mod_lognormal,
+  ~ Treatment * Wing_num, at = list(Wing_num = 1:3),   
+  type = "response"
+)
+emm_df <- as.data.frame(emm)
+
+d<-ggplot(emm_df, aes(x = Wing_num, y = response,
+                   color = Treatment, group = Treatment)) +
+  geom_ribbon(aes(ymin = lower.CL, ymax = upper.CL, fill = Treatment),
+              alpha = 0.25, linewidth = 0) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  scale_x_continuous(breaks = 1:3,
+                     labels = c("Apterous","Brachypterous","Macropterous")) +
+  labs(x = "Wing morphology",
+       y = "Fluctuating asymmetry index") +
+  theme_bw(base_size = 15) + theme_classic(base_size = 15)+
+  scale_color_manual(values = c("Control" = "black", "Solar park" = "grey40")) +
+  scale_fill_manual(values  = c("Control" = "black", "Solar park" = "grey40")) +
+  geom_jitter(data = data_picipennis_a2,
+              aes(x = Wing_num, y = FA3, color = Treatment), 
+              inherit.aes = FALSE,
+              width = 0.1, alpha = 0.6, size = 1.8)
+d
+# Save the plot
+tiff('Harpalus_picipennis.tiff',units="in",width=7,height=6,bg="white",res=600)
+d
+dev.off()
+
+# Boxplot options
+#####
 # Treatment with Wing morphology
 d<-ggplot(emm_df, aes(x = Treatment, y = response, fill = Treatment)) +
   geom_boxplot(outlier.shape = NA, alpha = 0.6) +
