@@ -67,41 +67,44 @@ shapiro.test(data_ophonus_a2_c$a1_abs)
 data_picipennis19_clean$log_fa <- log(data_picipennis19_clean$a1_abs + 0.0001)
 shapiro.test(data_picipennis19$log_fa)
 
-# Ordered factor of Wing.m.
-data_ophonus_a2_c <- data_ophonus_a2_c %>%
-  mutate(
-    Treatment = factor(Treatment, levels = c("Control", "Solar park")),
-    Wing.m.    = factor(Wing.m., levels = c("B","M"),
-                       labels = c("Brachypterous","Macropterous"),
-                       ordered = TRUE)
-  )
+# Ordered factor of Wing
+data_ophonus_a2_c$Wing <- factor(
+  data_ophonus_a2_c$Wing,
+  levels = c("B", "M"),
+  labels = c("Brachypterous", "Macropterous"),
+  ordered = TRUE
+)
+
+data_picipennis_a2$Wing <- factor(data_picipennis_a2$Wing, 
+                         levels = c("A","B","M"), 
+                         ordered = TRUE)
 
 # Homogenity of variance of FA index
 library(car)
 leveneTest(FA3~Treatment*Sex, data = data_ophonus_a2_c)
 
-leveneTest(FA3~Treatment*Wing.m., data = data_ophonus_a2_c)
+leveneTest(FA3~Treatment*Wing, data = data_ophonus_a2_c)
 
 data_ophonus_a2_c$Treatment <- factor(data_ophonus_a2_c$Treatment)
 data_ophonus_a2_c$Sex <- factor(data_ophonus_a2_c$Sex)
-data_flav_a3_clean$Wing.m. <- factor(data_flav_a3_clean$Wing.m.)
+data_flav_a3_clean$Wing <- factor(data_flav_a3_clean$Wing)
 # Dependency on Sex:Wing morphology
-lm_sex <- lm(FA3 ~ Sex*Wing.m., data = data_ophonus_a2_c)
+lm_sex <- lm(FA3 ~ Sex*Wing, data = data_ophonus_a2_c)
 summary(lm_sex)
-lm_treat <- lm(FA3 ~ Treatment*Wing.m., data = data_ophonus_a2_c)
+lm_treat <- lm(FA3 ~ Treatment*Wing, data = data_ophonus_a2_c)
 summary(lm_treat)
 lm_st <- lm(FA3 ~ Treatment*Sex, data = data_ophonus_a2_c)
 summary(lm_st)
 # When |R-L| are normal
 library(lme4)
-mod1<-lmer(FA3~Body.size+Treatment * Sex + Wing.m. + (1 | ID)+(1|Trap),data= data_ophonus_a2_c)
+mod1<-lmer(FA3~Body.size+Treatment * Sex + Wing + (1 | ID)+(1|Trap),data= data_ophonus_a2_c)
 summary(mod1)
 library(lmerTest)
 anova(mod1)
 # When |R-L| is non-normal
 library(glmmTMB)
-mod_lognormal <- glmmTMB(FA3 ~ Body.size + Treatment*Wing.m. +Sex + (1|ID)+(1|Locality.number),
-                         data = data_ophonus_a2_c,
+mod_lognormal <- glmmTMB(FA3 ~ Body.size + Treatment*Wing +Sex + (1|ID)+(1|Locality.number),
+                         data = data_picipennis_a2,
                          family = gaussian(link = "log"))
 summary(mod_lognormal)
 library(DHARMa)
@@ -119,14 +122,14 @@ library(ggpubr)
 library(emmeans)
 
 # Marginal means
-emm <- emmeans(mod_lognormal, ~ Treatment | Wing.m., type = "response")
+emm <- emmeans(mod_lognormal, ~ Treatment | Wing, type = "response")
 emm_df <- as.data.frame(emm)
 
 # Treatment with Wing morphology
 d<-ggplot(emm_df, aes(x = Treatment, y = response, fill = Treatment)) +
   geom_boxplot(outlier.shape = NA, alpha = 0.6) +
   geom_jitter(aes(color = Treatment), width = 0.2, size = 1.5, alpha = 0.8) +
-  facet_wrap(~ Wing.m.) +
+  facet_wrap(~ Wing) +
   scale_fill_grey(start = 0.3, end = 0.8) +
   scale_color_grey(start = 0.3, end = 0.8) +
   labs(
@@ -135,8 +138,7 @@ d<-ggplot(emm_df, aes(x = Treatment, y = response, fill = Treatment)) +
     fill = "Treatment",
     color = "Treatment"
   ) +
-  theme_bw(base_size = 15) +
-  stat_compare_means(
+  theme_bw(base_size = 15) +  stat_compare_means(
     method = "t.test",                            
     comparisons = list(c("Control", "Solar park")),   
     label = "p.format",                          
@@ -178,7 +180,7 @@ dev.off()
 df<-ggplot(data_flav_a3_clean, aes(x = Sex, y = FA3, fill = Sex)) +
   geom_boxplot(outlier.shape = NA, alpha = 0.6) +
   geom_jitter(aes(color = Sex), width = 0.2, size = 1.5, alpha = 0.8) +
-  facet_wrap(~ Wing.m.) +
+  facet_wrap(~ Wing) +
   scale_fill_grey(start = 0.3, end = 0.8) +
   scale_color_grey(start = 0.3, end = 0.8) +
   labs(
