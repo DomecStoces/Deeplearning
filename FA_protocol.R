@@ -74,7 +74,7 @@ data_ophonus_a2_c$Wing <- factor(
   labels = c("Brachypterous", "Macropterous"),
   ordered = TRUE
 )
-data_ophonus_a2_c$Wing_num <- as.numeric(data_ophonus_a2_c$Wing)
+data_ophonus_a2_c$Dispersal.ability <- as.numeric(data_ophonus_a2_c$Wing)
 
 
 data_picipennis_a2$Wing <- factor(
@@ -83,7 +83,7 @@ data_picipennis_a2$Wing <- factor(
   labels = c("Apterous","Brachypterous", "Macropterous"),
   ordered = TRUE
 )
-data_picipennis_a2$Wing_num <- as.numeric(data_picipennis_a2$Wing)
+data_picipennis_a2$Dispersal.ability <- as.numeric(data_picipennis_a2$Wing)
 
 # Homogenity of variance of FA index
 library(car)
@@ -109,8 +109,8 @@ library(lmerTest)
 anova(mod1)
 # When |R-L| is non-normal
 library(glmmTMB)
-mod_lognormal <- glmmTMB(FA3 ~ Body.size + Treatment*Wing_num +Sex + (1|ID)+(1|Locality.number),
-                         data = data_ophonus_a2_c,
+mod_lognormal <- glmmTMB(FA3 ~ Body.size + Treatment*Dispersal.ability +Sex + (1|ID)+(1|Locality.number),
+                         data = data_picipennis_a2,
                          family = gaussian(link = "log"))
 summary(mod_lognormal)
 library(DHARMa)
@@ -127,70 +127,68 @@ library(ggplot2)
 library(ggpubr)
 library(emmeans)
 
-# Ophonus cribricollis: model-based predictions at Wing_num = 1,2
-emm <- emmeans(
-  mod_lognormal, ~ Treatment * Wing_num,
-  at = list(Wing_num = 1:2),
-  type = "response",
-  weights = "proportional"  # averages over other factors by sample proportions
+# Ophonus cribricollis: model-based predictions at Dispersal.ability = 1,2
+x_grid <- seq(2, 3, length.out = 101)
+emm_df <- as.data.frame(
+  emmeans(mod_lognormal,
+          ~ Treatment * Dispersal.ability,
+          at = list(Dispersal.ability = x_grid),
+          type = "response",
+          weights = "proportional")
 )
 emm_df <- as.data.frame(emm)
 
-d<-ggplot(emm_df, aes(x = Wing_num, y = response,
+d<-ggplot(emm_df, aes(x = Dispersal.ability, y = response,
                       color = Treatment, group = Treatment)) +
   geom_ribbon(aes(ymin = lower.CL, ymax = upper.CL, fill = Treatment),
-              alpha = 0.25, linewidth = 0.5) +
-  geom_line(data = emm_df, 
-            aes(x = Wing_num, y = response, color = Treatment),linewidth = 1) +
-  scale_x_continuous(breaks = 1:2,
-                     labels = c("Brachypterous","Macropterous")) +
-  labs(x = "Wing morphology",
+              alpha = 0.25) +
+  geom_line(linewidth = 1) +
+  scale_x_continuous(breaks = c(2, 3), labels = c("2", "3")) +  
+  labs(x = "Dispersal ability",
        y = "Predicted fluctuating asymmetry index") +
-  theme_bw(base_size = 15) + theme_classic(base_size = 15)+
+  theme_classic(base_size = 15) +
   scale_color_manual(values = c("Control" = "black", "Solar park" = "grey40")) +
   scale_fill_manual(values  = c("Control" = "black", "Solar park" = "grey40")) +
   geom_jitter(data = data_ophonus_a2_c,
-              aes(x = Wing_num, y = FA3, color = Treatment), 
-              inherit.aes = FALSE,
-              width = 0.1, alpha = 0.6, size = 2.0)
+              aes(x = Dispersal.ability, y = FA3, color = Treatment),
+              inherit.aes = FALSE, width = 0.1, alpha = 0.6, size = 2)
 d
-# Harpalus picipennis: model-based predictions at Wing_num = 1,2,3
+# Harpalus picipennis: model-based predictions at Dispersal.ability = 1,2,3
 emm <- emmeans(
   mod_lognormal,
-  ~ Treatment * Wing_num, at = list(Wing_num = 1:3),   
+  ~ Treatment * Dispersal.ability, at = list(Dispersal.ability = 1:3),   
   type = "response"
 )
 emm_df <- as.data.frame(emm)
 
-d<-ggplot(emm_df, aes(x = Wing_num, y = response,
+d<-ggplot(emm_df, aes(x = Dispersal.ability, y = response,
                    color = Treatment, group = Treatment)) +
   geom_ribbon(aes(ymin = lower.CL, ymax = upper.CL, fill = Treatment),
               alpha = 0.25, linewidth = 0.5) +
   geom_line(data = emm_df, 
-            aes(x = Wing_num, y = response, color = Treatment),linewidth = 1)+
-  scale_x_continuous(breaks = 1:3,
-                     labels = c("Apterous","Brachypterous","Macropterous")) +
-  labs(x = "Wing morphology",
+            aes(x = Dispersal.ability, y = response, color = Treatment),linewidth = 1)+
+  scale_x_continuous(breaks = c(1,2, 3), labels = c("1","2", "3")) +
+  labs(x = "Dispersal ability",
        y = "Predicted fluctuating asymmetry index") +
   theme_bw(base_size = 15) + theme_classic(base_size = 15)+
   scale_color_manual(values = c("Control" = "black", "Solar park" = "grey40")) +
   scale_fill_manual(values  = c("Control" = "black", "Solar park" = "grey40")) +
   geom_jitter(data = data_picipennis_a2,
-              aes(x = Wing_num, y = FA3, color = Treatment), 
+              aes(x = Dispersal.ability, y = FA3, color = Treatment), 
               inherit.aes = FALSE,
               width = 0.1, alpha = 0.6, size = 2.0)+scale_y_continuous(limits = c(0, 0.25))
 d
 # Save the plot
-tiff('Ophonus_cribricollis.tiff',units="in",width=8,height=6,bg="white",res=600)
+tiff('Harpalus_picipennis.tiff',units="in",width=8,height=6,bg="white",res=600)
 d
 dev.off()
 
-de<-ggplot(emm_df, aes(x = Wing_num, y = response,
+de<-ggplot(emm_df, aes(x = Dispersal.ability, y = response,
                       color = Treatment, group = Treatment)) +
   geom_ribbon(aes(ymin = lower.CL, ymax = upper.CL, fill = Treatment),
               alpha = 0.25, linewidth = 0) +
   geom_line(data = emm_df, 
-            aes(x = Wing_num, y = response, color = Treatment)) +
+            aes(x = Dispersal.ability, y = response, color = Treatment)) +
   scale_x_continuous(breaks = 1:3,
                      labels = c("Apterous","Brachypterous","Macropterous")) +
   labs(x = "Wing morphology",
