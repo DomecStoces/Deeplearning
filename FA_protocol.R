@@ -142,7 +142,6 @@ d<-ggplot(emm_df, aes(x = Wing_num, y = response,
               alpha = 0.25, linewidth = 0.5) +
   geom_line(data = emm_df, 
             aes(x = Wing_num, y = response, color = Treatment),linewidth = 1) +
-  geom_point(size = 2) +
   scale_x_continuous(breaks = 1:2,
                      labels = c("Brachypterous","Macropterous")) +
   labs(x = "Wing morphology",
