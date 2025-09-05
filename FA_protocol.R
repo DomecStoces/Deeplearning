@@ -110,7 +110,7 @@ anova(mod1)
 # When |R-L| is non-normal
 library(glmmTMB)
 mod_lognormal <- glmmTMB(FA3 ~ Body.size + Treatment*Dispersal.ability +Sex + (1|ID)+(1|Locality.number),
-                         data = data_ophonus_a2_c,
+                         data = data_picipennis_a2,
                          family = gaussian(link = "log"))
 summary(mod_lognormal)
 library(DHARMa)
@@ -123,8 +123,8 @@ Anova(mod_lognormal, type = 3)
 library(emmeans)
 # On the link (log) scale:
 tr_link <- emtrends(mod_lognormal, ~ Treatment, var = "Dispersal.ability")
-summary(tr_link)       # slopes on log scale
-pairs(tr_link)         # Control - Solar park slope difference (matches interaction)
+summary(tr_link)       # slopes on log link
+pairs(tr_link)         # Control vs. Solar park slope difference
 # As multiplicative change per 1-step (ratio per step):
 slopes <- as.data.frame(summary(tr_link))
 slopes$ratio_per_step <- exp(slopes$Dispersal.ability.trend)
