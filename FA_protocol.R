@@ -110,7 +110,7 @@ anova(mod1)
 # When |R-L| is non-normal
 library(glmmTMB)
 mod_lognormal <- glmmTMB(FA3 ~ Body.size + Treatment*Dispersal.ability +Sex + (1|ID)+(1|Locality.number),
-                         data = data_picipennis_a2,
+                         data = data_ophonus_a2_c,
                          family = gaussian(link = "log"))
 summary(mod_lognormal)
 library(DHARMa)
@@ -118,6 +118,19 @@ simres <- simulateResiduals(mod_lognormal)
 plot(simres)
 library(car)
 Anova(mod_lognormal, type = 3)
+
+# Simple-slope estimates for treatment x dispersal ability
+library(emmeans)
+# On the link (log) scale:
+tr_link <- emtrends(mod_lognormal, ~ Treatment, var = "Dispersal.ability")
+summary(tr_link)       # slopes on log scale
+pairs(tr_link)         # Control - Solar park slope difference (matches interaction)
+# As multiplicative change per 1-step (ratio per step):
+slopes <- as.data.frame(summary(tr_link))
+slopes$ratio_per_step <- exp(slopes$Dispersal.ability.trend)
+slopes
+# On the response scale (absolute change in FA per step):
+summary(emtrends(mod_lognormal, ~ Treatment, var = "Dispersal.ability", type = "response"))
 
 tiff('DHARMa_residual_HP_a2.tiff',units="in",width=7,height=6,bg="white",res=600)
 plot(simres)
