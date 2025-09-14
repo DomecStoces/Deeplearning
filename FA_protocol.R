@@ -110,7 +110,7 @@ anova(mod1)
 # When |R-L| is non-normal
 library(glmmTMB)
 mod_lognormal <- glmmTMB(FA3 ~ Body.size + Treatment*Dispersal.ability +Sex + (1|ID)+(1|Locality.number),
-                         data = data_picipennis_a2,
+                         data = data_ophonus_a2_c,
                          family = gaussian(link = "log"))
 summary(mod_lognormal)
 library(DHARMa)
@@ -149,7 +149,6 @@ emm_df <- as.data.frame(
           type = "response",
           weights = "proportional")
 )
-emm_df <- as.data.frame(emm)
 
 d<-ggplot(emm_df, aes(x = Dispersal.ability, y = response,
                       color = Treatment, group = Treatment)) +
@@ -158,7 +157,7 @@ d<-ggplot(emm_df, aes(x = Dispersal.ability, y = response,
   geom_line(linewidth = 1) +
   scale_x_continuous(breaks = c(2, 3), labels = c("2", "3")) +  
   labs(x = "Dispersal ability",
-       y = "Predicted fluctuating asymmetry index") +
+       y = "Fluctuating asymmetry index") +
   theme_classic(base_size = 15) +
   scale_color_manual(values = c("Control" = "black", "Solar park" = "grey40")) +
   scale_fill_manual(values  = c("Control" = "black", "Solar park" = "grey40")) +
@@ -182,7 +181,7 @@ d<-ggplot(emm_df, aes(x = Dispersal.ability, y = response,
             aes(x = Dispersal.ability, y = response, color = Treatment),linewidth = 1)+
   scale_x_continuous(breaks = c(1,2, 3), labels = c("1","2", "3")) +
   labs(x = "Dispersal ability",
-       y = "Predicted fluctuating asymmetry index") +
+       y = "Fluctuating asymmetry index") +
   theme_bw(base_size = 15) + theme_classic(base_size = 15)+
   scale_color_manual(values = c("Control" = "black", "Solar park" = "grey40")) +
   scale_fill_manual(values  = c("Control" = "black", "Solar park" = "grey40")) +
@@ -192,7 +191,7 @@ d<-ggplot(emm_df, aes(x = Dispersal.ability, y = response,
               width = 0.1, alpha = 0.6, size = 2.0)+scale_y_continuous(limits = c(0, 0.25))
 d
 # Save the plot
-tiff('Harpalus_picipennis.tiff',units="in",width=8,height=6,bg="white",res=600)
+tiff('Ophonus_cribricollis.tiff',units="in",width=8,height=6,bg="white",res=600)
 d
 dev.off()
 
