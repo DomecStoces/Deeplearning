@@ -20,33 +20,34 @@ library(outliers)
 grubbs.test(grubb_picipennis16$a1)
 # Outliers Rivera, G.; Neely, C.M.D. Patterns of fluctuating asymmetry in the limbs of freshwater turtles: Are more functionally important limbs more symmetrical? Evolution 2020, 74, 660–670.
 # points between 1.5×IQR and 3×IQR are considered as natural variation in developmental instability.
-Q1 <- quantile(grubb_ophonus_a2_c$a2, 0.25)
-Q3 <- quantile(grubb_ophonus_a2_c$a2, 0.75)
-IQR_value <- IQR(grubb_ophonus_a2_c$a2)
+Q1 <- quantile(grubb_flav_a4$a4, 0.25)
+Q3 <- quantile(grubb_flav_a4$a4, 0.75)
+IQR_value <- IQR(grubb_flav_a4$a4)
 
 lower_extreme <- Q1 - 3 * IQR_value
 upper_extreme <- Q3 + 3 * IQR_value
 lower_mild <- Q1 - 1.5 * IQR_value
 upper_mild <- Q3 + 1.5 * IQR_value
-grubb_ophonus_a2_c$outlier_type <- with(grubb_ophonus_a2_c, ifelse(
-  a2 < lower_extreme | a2 > upper_extreme, "extreme",
-  ifelse(a2 < lower_mild | a2 > upper_mild, "mild", "none")
+grubb_flav_a4$outlier_type <- with(grubb_flav_a4, ifelse(
+  a4 < lower_extreme | a4 > upper_extreme, "extreme",
+  ifelse(a4 < lower_mild | a4 > upper_mild, "mild", "none")
 ))
-table(grubb_ophonus_a2_c$outlier_type)
+table(grubb_flav_a4$outlier_type)
 
 # Remove outliers
-grubb_ophonus_a4 <- subset(grubb_ophonus_a4, outlier_type != "extreme")
-IDs_mild_none <- unique(grubb_ophonus_a4$Group)
-data_ophonus_a4_clean <- data_ophonus_a4 %>%
+grubb_flav_a4 <- subset(grubb_flav_a4, outlier_type != "extreme")
+IDs_mild_none <- unique(grubb_flav_a4$Group)
+data_ophonus_a4_clean <- grubb_flav_a4 %>%
   filter(ID %in% IDs_mild_none)
 str(data_ophonus_a4_clean)
 
-skewness(grubb_ophonus_a2_c$a2)
-kurtosis(grubb_ophonus_a2_c$a2)
+skewness(grubb_flav_a4$a4)
+kurtosis(grubb_flav_a4$a4)
 
 # Dependency on ME/DA in raw dataset in grubb_XXX; extract variance and correlation components as per Van Dongen et al., 1999 (https://doi.org/10.1046/j.1420-9101.1999.00012.x)
 grubb_ophonus_a2_c$Side_num <- ifelse(grubb_ophonus_a2_c$SIDE.a1 == "L", -1, 1)
 library(nlme)
+<<<<<<< HEAD
 mod_fa <- lme(
   a2 ~ Side_num, 
   random = ~ Side_num | Group, 
@@ -68,16 +69,22 @@ print(lrt)
 pval_adj <- lrt$"p-value"[2] / 2
 cat("Adjusted p-value for FA variance component:", pval_adj, "\n")
 
+=======
+lme_model <- lme(a4 ~ SIDE.a1, random = ~1|Group/SIDE.a1, data = grubb_flav_a4)
+summary(lme_model)
+VarCorr(lme_model)
+
+>>>>>>> 0d5673757f5d40a89032d072cc25df0103aa5811
 # A linear mixed-effects model (REML) was used to test for directional asymmetry (DA), fluctuating asymmetry (FA), and measurement error (ME). The fixed effect of side was not significant (p = 0.33), indicating no DA. The variance attributable to individual × side interaction (FA) was 0.000175, while residual variance (ME) was 0.00000052, yielding a %ME of 0.30%.
 # Palmer, A. R., & Strobeck, C. (2003). Fluctuating asymmetry analyses revisited. In Polak, M. (Ed.), Developmental Instability: Causes and Consequences. Oxford University Press, pp. 279–319.
 
 # Dependency |R-L| to Body size
-data_ophonus_a2_c$a1_abs<- abs(data_ophonus_a2_c$`a2 R` - data_ophonus_a2_c$`a2 L`) 
-lm_abs <- lm(a1_abs ~ Body.size, data = data_ophonus_a2_c)
+data_flav_a4$a1_abs<- abs(data_flav_a4$`a4 R` - data_flav_a4$`a4 L`) 
+lm_abs <- lm(a1_abs ~ Body.size, data = data_flav_a4)
 summary(lm_abs)
 
 # Normality of |R-L|; i) if significant -> error structure is non-additive; ii) test log transformation if significant -> non-multiplicative
-shapiro.test(data_ophonus_a2_c$a1_abs)
+shapiro.test(data_flav_a4$a1_abs)
 
 data_picipennis19_clean$log_fa <- log(data_picipennis19_clean$a1_abs + 0.0001)
 shapiro.test(data_picipennis19$log_fa)
@@ -89,7 +96,7 @@ data_ophonus_a2_c$Wing <- factor(
   labels = c("Brachypterous", "Macropterous"),
   ordered = TRUE
 )
-data_ophonus_a2_c$Wing_num <- as.numeric(data_ophonus_a2_c$Wing)
+data_ophonus_a2_c$Dispersal.ability <- as.numeric(data_ophonus_a2_c$Wing)
 
 
 data_picipennis_a2$Wing <- factor(
@@ -98,7 +105,7 @@ data_picipennis_a2$Wing <- factor(
   labels = c("Apterous","Brachypterous", "Macropterous"),
   ordered = TRUE
 )
-data_picipennis_a2$Wing_num <- as.numeric(data_picipennis_a2$Wing)
+data_picipennis_a2$Dispersal.ability <- as.numeric(data_picipennis_a2$Wing)
 
 # Homogenity of variance of FA index
 library(car)
@@ -110,22 +117,22 @@ data_ophonus_a2_c$Treatment <- factor(data_ophonus_a2_c$Treatment)
 data_ophonus_a2_c$Sex <- factor(data_ophonus_a2_c$Sex)
 data_flav_a3_clean$Wing <- factor(data_flav_a3_clean$Wing)
 # Dependency on Sex:Wing morphology
-lm_sex <- lm(FA3 ~ Sex*Wing, data = data_ophonus_a2_c)
+lm_sex <- lm(FA3 ~ Sex*Wing, data = data_flav_a4)
 summary(lm_sex)
-lm_treat <- lm(FA3 ~ Treatment*Wing, data = data_ophonus_a2_c)
+lm_treat <- lm(FA3 ~ Treatment*Wing, data = data_flav_a4)
 summary(lm_treat)
-lm_st <- lm(FA3 ~ Treatment*Sex, data = data_ophonus_a2_c)
+lm_st <- lm(FA3 ~ Treatment*Sex, data = data_flav_a4)
 summary(lm_st)
 # When |R-L| are normal
 library(lme4)
-mod1<-lmer(FA3~Body.size+Treatment * Sex + Wing + (1 | ID)+(1|Trap),data= data_ophonus_a2_c)
+mod1<-lmer(FA3~Body.size+Treatment * Sex + Wing + (1 | ID)+(1|Trap),data= data_flav_a4)
 summary(mod1)
 library(lmerTest)
 anova(mod1)
 # When |R-L| is non-normal
 library(glmmTMB)
-mod_lognormal <- glmmTMB(FA3 ~ Body.size + Treatment*Wing_num +Sex + (1|ID)+(1|Locality.number),
-                         data = data_ophonus_a2_c,
+mod_lognormal <- glmmTMB(FA3 ~ Body.size + Treatment*Dispersal.ability + Sex + (1|ID)+(1|Locality.number),
+                         data = data_picipennis_a2,
                          family = gaussian(link = "log"))
 summary(mod_lognormal)
 library(DHARMa)
@@ -134,7 +141,20 @@ plot(simres)
 library(car)
 Anova(mod_lognormal, type = 3)
 
-tiff('DHARMa_residual_HP_a2.tiff',units="in",width=7,height=6,bg="white",res=600)
+# Simple-slope estimates for treatment x dispersal ability
+library(emmeans)
+# On the link (log) scale:
+tr_link <- emtrends(mod_lognormal, ~ Treatment, var = "Dispersal.ability")
+summary(tr_link)       # slopes on log link
+pairs(tr_link)         # Control vs. Solar park slope difference
+# As multiplicative change per 1-step (ratio per step):
+slopes <- as.data.frame(summary(tr_link))
+slopes$ratio_per_step <- exp(slopes$Dispersal.ability.trend)
+slopes
+# On the response scale (absolute change in FA per step):
+summary(emtrends(mod_lognormal, ~ Treatment, var = "Dispersal.ability", type = "response"))
+
+tiff('DHARMa_residual_OC_a2.tiff',units="in",width=7,height=6,bg="white",res=600)
 plot(simres)
 dev.off()
 # Plotting results of model estimations (predicted values) 
@@ -142,78 +162,76 @@ library(ggplot2)
 library(ggpubr)
 library(emmeans)
 
-# Ophonus cribricollis: model-based predictions at Wing_num = 1,2
-emm <- emmeans(
-  mod_lognormal, ~ Treatment * Wing_num,
-  at = list(Wing_num = 1:2),
-  type = "response",
-  weights = "proportional"  # averages over other factors by sample proportions
+# Ophonus cribricollis: model-based predictions at Dispersal.ability = 1,2
+x_grid <- seq(2, 3, length.out = 101)
+emm_df <- as.data.frame(
+  emmeans(mod_lognormal,
+          ~ Treatment * Dispersal.ability,
+          at = list(Dispersal.ability = x_grid),
+          type = "response",
+          weights = "proportional")
 )
-emm_df <- as.data.frame(emm)
 
-d<-ggplot(emm_df, aes(x = Wing_num, y = response,
+emm_df$Treatment <- factor(emm_df$Treatment,
+                           levels = c("Control", "Solar park"),
+                           labels = c("Extensive grassland", "Solar park"))
+
+data_ophonus_a2_c$Treatment <- factor(data_ophonus_a2_c$Treatment,
+                                      levels = c("Control", "Solar park"),
+                                      labels = c("Extensive grassland", "Solar park"))
+
+d<-ggplot(emm_df, aes(x = Dispersal.ability, y = response,
                       color = Treatment, group = Treatment)) +
   geom_ribbon(aes(ymin = lower.CL, ymax = upper.CL, fill = Treatment),
-              alpha = 0.25, linewidth = 0.5) +
-  geom_line(data = emm_df, 
-            aes(x = Wing_num, y = response, color = Treatment),linewidth = 1) +
-  scale_x_continuous(breaks = 1:2,
-                     labels = c("Brachypterous","Macropterous")) +
-  labs(x = "Wing morphology",
-       y = "Predicted fluctuating asymmetry index") +
-  theme_bw(base_size = 15) + theme_classic(base_size = 15)+
-  scale_color_manual(values = c("Control" = "black", "Solar park" = "grey40")) +
-  scale_fill_manual(values  = c("Control" = "black", "Solar park" = "grey40")) +
+              alpha = 0.25) +
+  geom_line(linewidth = 1) +
+  scale_x_continuous(breaks = c(2, 3), labels = c("2 = Brachypterous", "3 = Macropterous")) +  
+  labs(x = "Dispersal ability",
+       y = "Fluctuating asymmetry index") +
+  theme_classic(base_size = 15) +
+  scale_color_manual(values = c("Extensive grassland" = "black", "Solar park" = "grey40")) +
+  scale_fill_manual(values  = c("Extensive grassland" = "black", "Solar park" = "grey40")) +
   geom_jitter(data = data_ophonus_a2_c,
-              aes(x = Wing_num, y = FA3, color = Treatment), 
-              inherit.aes = FALSE,
-              width = 0.1, alpha = 0.6, size = 2.0)
+              aes(x = Dispersal.ability, y = FA3, color = Treatment),
+              inherit.aes = FALSE, width = 0.1, alpha = 0.6, size = 2)
 d
-# Harpalus picipennis: model-based predictions at Wing_num = 1,2,3
+# Harpalus picipennis: model-based predictions at Dispersal.ability = 1,2,3
 emm <- emmeans(
   mod_lognormal,
-  ~ Treatment * Wing_num, at = list(Wing_num = 1:3),   
+  ~ Treatment * Dispersal.ability, at = list(Dispersal.ability = 1:3),   
   type = "response"
 )
 emm_df <- as.data.frame(emm)
 
-d<-ggplot(emm_df, aes(x = Wing_num, y = response,
+emm_df$Treatment <- factor(emm_df$Treatment,
+                           levels = c("Control", "Solar park"),
+                           labels = c("Extensive grassland", "Solar park"))
+
+data_picipennis_a2$Treatment <- factor(data_picipennis_a2$Treatment,
+                                      levels = c("Control", "Solar park"),
+                                      labels = c("Extensive grassland", "Solar park"))
+
+d<-ggplot(emm_df, aes(x = Dispersal.ability, y = response,
                    color = Treatment, group = Treatment)) +
   geom_ribbon(aes(ymin = lower.CL, ymax = upper.CL, fill = Treatment),
               alpha = 0.25, linewidth = 0.5) +
   geom_line(data = emm_df, 
-            aes(x = Wing_num, y = response, color = Treatment),linewidth = 1)+
-  scale_x_continuous(breaks = 1:3,
-                     labels = c("Apterous","Brachypterous","Macropterous")) +
-  labs(x = "Wing morphology",
-       y = "Predicted fluctuating asymmetry index") +
-  theme_bw(base_size = 15) + theme_classic(base_size = 15)+
-  scale_color_manual(values = c("Control" = "black", "Solar park" = "grey40")) +
-  scale_fill_manual(values  = c("Control" = "black", "Solar park" = "grey40")) +
-  geom_jitter(data = data_picipennis_a2,
-              aes(x = Wing_num, y = FA3, color = Treatment), 
-              inherit.aes = FALSE,
-              width = 0.1, alpha = 0.6, size = 2.0)+scale_y_continuous(limits = c(0, 0.25))
-d
-# Save the plot
-tiff('Ophonus_cribricollis.tiff',units="in",width=8,height=6,bg="white",res=600)
-d
-dev.off()
-
-de<-ggplot(emm_df, aes(x = Wing_num, y = response,
-                      color = Treatment, group = Treatment)) +
-  geom_ribbon(aes(ymin = lower.CL, ymax = upper.CL, fill = Treatment),
-              alpha = 0.25, linewidth = 0) +
-  geom_line(data = emm_df, 
-            aes(x = Wing_num, y = response, color = Treatment)) +
-  scale_x_continuous(breaks = 1:3,
-                     labels = c("Apterous","Brachypterous","Macropterous")) +
-  labs(x = "Wing morphology",
+            aes(x = Dispersal.ability, y = response, color = Treatment),linewidth = 1)+
+  scale_x_continuous(breaks = c(1,2, 3), labels = c("1 = Apterous","2 = Brachypterous", "3 = Macropterous")) +
+  labs(x = "Dispersal ability",
        y = "Fluctuating asymmetry index") +
   theme_bw(base_size = 15) + theme_classic(base_size = 15)+
-  scale_color_manual(values = c("Control" = "black", "Solar park" = "grey40")) +
-  scale_fill_manual(values  = c("Control" = "black", "Solar park" = "grey40")) 
-de
+  scale_color_manual(values = c("Extensive grassland" = "black", "Solar park" = "grey40")) +
+  scale_fill_manual(values  = c("Extensive grassland" = "black", "Solar park" = "grey40")) +
+  geom_jitter(data = data_picipennis_a2,
+              aes(x = Dispersal.ability, y = FA3, color = Treatment), 
+              inherit.aes = FALSE,
+              width = 0.1, alpha = 0.6, size = 2.0)+coord_cartesian(ylim = c(0, 0.25))
+d
+# Save the plot
+tiff('Harpalus_picipennis.tiff',units="in",width=8,height=6,bg="white",res=600)
+d
+dev.off()
 # Boxplot options
 #####
 # Treatment with Wing morphology
