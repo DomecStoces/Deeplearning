@@ -44,14 +44,29 @@ str(data_ophonus_a4_clean)
 skewness(grubb_ophonus_a2_c$a2)
 kurtosis(grubb_ophonus_a2_c$a2)
 
-# Dependency on ME in raw dataset in grubb_XXX; extract variance and correlation components
+# Dependency on ME/DA in raw dataset in grubb_XXX; extract variance and correlation components as per Van Dongen et al., 1999 (https://doi.org/10.1046/j.1420-9101.1999.00012.x)
+grubb_ophonus_a2_c$Side_num <- ifelse(grubb_ophonus_a2_c$SIDE.a1 == "L", -1, 1)
 library(nlme)
-lme_model <- lme(a2 ~ SIDE.a1, random = ~1|Group/SIDE.a1, data = grubb_ophonus_a2_c)
-summary(lme_model)
-VarCorr(lme_model)
+mod_fa <- lme(
+  a2 ~ Side_num, 
+  random = ~ Side_num | Group, 
+  data = grubb_ophonus_a2_c,
+  method = "REML")
 
-aov1<-aov(a1 ~ SIDE.a1+Error(Group/SIDE.a1), data = grubb_picipennis1)
-summary(aov1)
+summary(mod_fa)
+VarCorr(mod_fa)
+
+mod_fa_reduced <- lme(
+  a2 ~ Side_num,
+  random = ~ 1 | Group,
+  data = grubb_ophonus_a2_c,
+  method = "REML"
+)
+lrt <- anova(mod_fa, mod_fa_reduced)
+print(lrt)
+# Adjust p-value for variance component testing (50:50 mixture chi² distribution)
+pval_adj <- lrt$"p-value"[2] / 2
+cat("Adjusted p-value for FA variance component:", pval_adj, "\n")
 
 # A linear mixed-effects model (REML) was used to test for directional asymmetry (DA), fluctuating asymmetry (FA), and measurement error (ME). The fixed effect of side was not significant (p = 0.33), indicating no DA. The variance attributable to individual × side interaction (FA) was 0.000175, while residual variance (ME) was 0.00000052, yielding a %ME of 0.30%.
 # Palmer, A. R., & Strobeck, C. (2003). Fluctuating asymmetry analyses revisited. In Polak, M. (Ed.), Developmental Instability: Causes and Consequences. Oxford University Press, pp. 279–319.
