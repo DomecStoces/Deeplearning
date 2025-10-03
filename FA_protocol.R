@@ -47,7 +47,6 @@ kurtosis(grubb_flav_a4$a4)
 # Dependency on ME/DA in raw dataset in grubb_XXX; extract variance and correlation components as per Van Dongen et al., 1999 (https://doi.org/10.1046/j.1420-9101.1999.00012.x)
 grubb_ophonus_a2_c$Side_num <- ifelse(grubb_ophonus_a2_c$SIDE.a1 == "L", -1, 1)
 library(nlme)
-<<<<<<< HEAD
 mod_fa <- lme(
   a2 ~ Side_num, 
   random = ~ Side_num | Group, 
@@ -69,12 +68,6 @@ print(lrt)
 pval_adj <- lrt$"p-value"[2] / 2
 cat("Adjusted p-value for FA variance component:", pval_adj, "\n")
 
-=======
-lme_model <- lme(a4 ~ SIDE.a1, random = ~1|Group/SIDE.a1, data = grubb_flav_a4)
-summary(lme_model)
-VarCorr(lme_model)
-
->>>>>>> 0d5673757f5d40a89032d072cc25df0103aa5811
 # A linear mixed-effects model (REML) was used to test for directional asymmetry (DA), fluctuating asymmetry (FA), and measurement error (ME). The fixed effect of side was not significant (p = 0.33), indicating no DA. The variance attributable to individual × side interaction (FA) was 0.000175, while residual variance (ME) was 0.00000052, yielding a %ME of 0.30%.
 # Palmer, A. R., & Strobeck, C. (2003). Fluctuating asymmetry analyses revisited. In Polak, M. (Ed.), Developmental Instability: Causes and Consequences. Oxford University Press, pp. 279–319.
 
