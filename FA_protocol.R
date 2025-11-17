@@ -106,7 +106,7 @@ library(lmerTest)
 anova(mod1)
 # When |R-L| is non-normal
 library(glmmTMB)
-mod_lognormal <- glmmTMB(FA3 ~ Body.size + Treatment*Dispersal.ability + Sex + (1|ID)+(1|Locality.number),
+mod_lognormal <- glmmTMB(FA3 ~ Body.size + Treatment*Dispersal.ability + Sex +(1|Locality.number/ID),
                          data = data_picipennis_a2,
                          family = gaussian(link = "log"))
 summary(mod_lognormal)
