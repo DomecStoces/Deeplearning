@@ -125,7 +125,7 @@ anova(mod1)
 # When |R-L| is non-normal
 library(glmmTMB)
 mod_lognormal <- glmmTMB(FA3 ~ Body.size + Treatment*Dispersal.ability + Sex +(1|Locality.number/ID),
-                         data = data_picipennis_a2,
+                         data = data_ophonus_a2_c,
                          family = gaussian(link = "log"))
 summary(mod_lognormal)
 library(DHARMa)
@@ -223,6 +223,10 @@ d<-ggplot(emm_df, aes(x = Dispersal.ability, y = response,
 d
 # Save the plot
 tiff('Harpalus_picipennis.tiff',units="in",width=8,height=6,bg="white",res=600)
+d
+dev.off()
+
+pdf('Ophonus_cribricollis.pdf',bg="white")
 d
 dev.off()
 # Boxplot options
