@@ -5,7 +5,7 @@ library(dplyr)
 
 # Read .xlsx dataset with header
 data_picipennis_a2 <- read_xlsx("data_picipennis_a2.xlsx", col_names = TRUE)
-data_ophonus_a2_c <- read_xlsx("data_ophonus_a2_c.xlsx", col_names = TRUE)
+data_ophonus_a2 <- read_xlsx("data_ophonus_a2.xlsx", col_names = TRUE)
 # Convert to data.table
 dataset_dt <- as.data.table(dataset)
 grubb_picipennis1 <- as.data.table(dataset1)
@@ -45,12 +45,12 @@ skewness(grubb_flav_a4$a4)
 kurtosis(grubb_flav_a4$a4)
 
 # Dependency on ME/DA in raw dataset in grubb_XXX; extract variance and correlation components as per Van Dongen et al., 1999 (https://doi.org/10.1046/j.1420-9101.1999.00012.x)
-grubb_ophonus_a2_c$Side_num <- ifelse(grubb_ophonus_a2_c$SIDE.a1 == "L", -1, 1)
+grubb_ophonus_a2$Side_num <- ifelse(grubb_ophonus_a2$SIDE.a1 == "L", -1, 1)
 library(nlme)
 mod_fa <- lme(
   a2 ~ Side_num, 
   random = ~ Side_num | Group, 
-  data = grubb_ophonus_a2_c,
+  data = grubb_ophonus_a2,
   method = "REML")
 
 summary(mod_fa)
@@ -59,7 +59,7 @@ VarCorr(mod_fa)
 mod_fa_reduced <- lme(
   a2 ~ Side_num,
   random = ~ 1 | Group,
-  data = grubb_ophonus_a2_c,
+  data = grubb_ophonus_a2,
   method = "REML"
 )
 lrt <- anova(mod_fa, mod_fa_reduced)
@@ -83,13 +83,13 @@ data_picipennis19_clean$log_fa <- log(data_picipennis19_clean$a1_abs + 0.0001)
 shapiro.test(data_picipennis19$log_fa)
 
 # Ordered factor of Wing
-data_ophonus_a2_c$Wing <- factor(
-  data_ophonus_a2_c$Wing,
+data_ophonus_a2$Wing <- factor(
+  data_ophonus_a2$Wing,
   levels = c("B", "M"),
   labels = c("Brachypterous", "Macropterous"),
   ordered = TRUE
 )
-data_ophonus_a2_c$Dispersal.ability <- as.numeric(data_ophonus_a2_c$Wing)
+data_ophonus_a2$Dispersal.ability <- as.numeric(data_ophonus_a2$Wing)
 
 
 data_picipennis_a2$Wing <- factor(
@@ -102,12 +102,12 @@ data_picipennis_a2$Dispersal.ability <- as.numeric(data_picipennis_a2$Wing)
 
 # Homogenity of variance of FA index
 library(car)
-leveneTest(FA3~Treatment*Sex, data = data_ophonus_a2_c)
+leveneTest(FA3~Treatment*Sex, data = data_ophonus_a2)
 
-leveneTest(FA3~Treatment*Wing, data = data_ophonus_a2_c)
+leveneTest(FA3~Treatment*Wing, data = data_ophonus_a2)
 
-data_ophonus_a2_c$Treatment <- factor(data_ophonus_a2_c$Treatment)
-data_ophonus_a2_c$Sex <- factor(data_ophonus_a2_c$Sex)
+data_ophonus_a2$Treatment <- factor(data_ophonus_a2$Treatment)
+data_ophonus_a2$Sex <- factor(data_ophonus_a2$Sex)
 data_flav_a3_clean$Wing <- factor(data_flav_a3_clean$Wing)
 # Dependency on Sex:Wing morphology
 lm_sex <- lm(FA3 ~ Sex*Wing, data = data_flav_a4)
@@ -125,7 +125,7 @@ anova(mod1)
 # When |R-L| is non-normal
 library(glmmTMB)
 mod_lognormal <- glmmTMB(FA3 ~ Body.size + Treatment*Dispersal.ability + Sex +(1|Locality.number/ID),
-                         data = data_ophonus_a2_c,
+                         data = data_ophonus_a2,
                          family = gaussian(link = "log"))
 summary(mod_lognormal)
 library(DHARMa)
@@ -169,7 +169,7 @@ emm_df$Treatment <- factor(emm_df$Treatment,
                            levels = c("Control", "Solar park"),
                            labels = c("Extensive grassland", "Solar park"))
 
-data_ophonus_a2_c$Treatment <- factor(data_ophonus_a2_c$Treatment,
+data_ophonus_a2$Treatment <- factor(data_ophonus_a2$Treatment,
                                       levels = c("Control", "Solar park"),
                                       labels = c("Extensive grassland", "Solar park"))
 
@@ -184,7 +184,7 @@ d<-ggplot(emm_df, aes(x = Dispersal.ability, y = response,
   theme_classic(base_size = 15) +
   scale_color_manual(values = c("Extensive grassland" = "black", "Solar park" = "grey40")) +
   scale_fill_manual(values  = c("Extensive grassland" = "black", "Solar park" = "grey40")) +
-  geom_jitter(data = data_ophonus_a2_c,
+  geom_jitter(data = data_ophonus_a2,
               aes(x = Dispersal.ability, y = FA3, color = Treatment),
               inherit.aes = FALSE, width = 0.1, alpha = 0.6, size = 2)
 d
